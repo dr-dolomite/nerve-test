@@ -21,10 +21,10 @@ export const saveFollowUpPlan = async (values: z.infer<typeof FollowUpPlanSchema
     // Parse the next visit date
     const nextVisitDate = new Date(nextVisit);
 
-    // Check if the next visit date is before or equal to today
-    if (nextVisitDate <= new Date()) {
-        return { error: "Next visit date should be in the future." };
-    }
+    // // Check if the next visit date is before or equal to today
+    // if (nextVisitDate <= new Date()) {
+    //     return { error: "Next visit date should be in the future." };
+    // }
 
     // Check if the patient exists
     const patient = await db.patientInformation.findUnique({
