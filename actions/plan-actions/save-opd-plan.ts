@@ -118,8 +118,5 @@ export const saveOPDPlan = async (values: z.infer<typeof OPDPlanSchema>) => {
         })
     }
 
-    
-
-
     return { success: "OPD plan saved. Please proceed." };
 };

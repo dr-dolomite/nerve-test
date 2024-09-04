@@ -202,7 +202,7 @@ model FollowUpPlan {
   historyId     String?  @unique
   followUpId    String?  @unique
   date          DateTime
-  nextVisit     DateTime
+  nextVisit     DateTime?
   followUpNotes String?
 
   patient        PatientInformation @relation(fields: [patientId], references: [id], onDelete: Cascade)
@@ -221,7 +221,7 @@ model OPDPlan {
   medication   String
   diagnosis    String
   opdNotes     String?
-  followUpDate DateTime
+  followUpDate DateTime?
 
   patient        PatientInformation @relation(fields: [patientId], references: [id], onDelete: Cascade)
   PatientHistory PatientHistory?    @relation(fields: [historyId], references: [id])

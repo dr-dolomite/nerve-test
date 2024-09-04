@@ -1,14 +1,11 @@
 "use client";
 
 import * as z from "zod";
-import {
-  useTransition,
-  useState
-} from "react";
-
-import { useForm } from "react-hook-form"
-import { zodResolver } from "@hookform/resolvers/zod"
+import { useTransition, useState, useRef } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { useSearchParams } from "next/navigation";
+import ReactToPrint from "react-to-print";
 
 import {
   Card,
@@ -16,8 +13,7 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card"
-
+} from "@/components/ui/card";
 import {
   Form,
   FormControl,
@@ -26,22 +22,20 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { FormError } from "@/components/form-error";
 import { FormSuccess } from "@/components/form-success";
 import { Textarea } from "@/components/ui/textarea";
-
 import { OPDPlanSchema } from "@/schemas";
 import { saveOPDPlan } from "@/actions/plan-actions/save-opd-plan";
 import Link from "next/link";
 import { Label } from "../ui/label";
 import { ArrowRight, Check, PrinterIcon } from "lucide-react";
 
+import OPDPrintableComponent from "@/components/printables/opd-form";
 
 const OPDPlanPage = () => {
-
   const [error, setError] = useState<string | undefined>("");
   const [success, setSuccess] = useState<string | undefined>("");
   const [isPending, startTransition] = useTransition();
@@ -62,6 +56,8 @@ const OPDPlanPage = () => {
     },
   });
 
+  const [formData, setFormData] = useState<z.infer<typeof OPDPlanSchema> | null>(null);
+
   const onSubmit = (values: z.infer<typeof OPDPlanSchema>) => {
     setError("");
     setSuccess("");
@@ -75,27 +71,33 @@ const OPDPlanPage = () => {
           }
 
           if (data?.success) {
+            setFormData(values); // Store form data to pass to the printable component
             form.reset();
             setSuccess(data.success);
           }
         })
         .catch(() => {
           setError("An error occurred.");
-        })
+        });
     });
   };
+
+  const printableRef = useRef(null);
 
   return (
     <Card className="p-4">
       <CardHeader>
         <CardTitle>Patient OPD Plan</CardTitle>
         <CardDescription>
-          Fill up the form below to save plan for the previous record.
+          Fill up the form below to save the plan for the previous record.
         </CardDescription>
       </CardHeader>
       <CardContent>
         <Form {...form}>
-          <form className="grid grid-cols-1 grid-flow-row gap-8" onSubmit={form.handleSubmit(onSubmit)}>
+          <form
+            className="grid grid-cols-1 grid-flow-row gap-8"
+            onSubmit={form.handleSubmit(onSubmit)}
+          >
             <div className="col-span-1 max-w-screen-md">
               <FormField
                 control={form.control}
@@ -189,7 +191,6 @@ const OPDPlanPage = () => {
               />
             </div>
 
-
             <div className="flex flex-col mt-4 col-span-1 gap-y-4">
               <div className="text-center">
                 <FormError message={error} />
@@ -197,12 +198,13 @@ const OPDPlanPage = () => {
               </div>
 
               <div className="flex flex-row gap-x-12 mt-4">
-                {!success && error != "Follow-up plan already exists." && (
+                {!success && error !== "Follow-up plan already exists." && (
                   <Button
                     type="submit"
                     className="my-button-blue"
                     size="lg"
-                    disabled={isPending}>
+                    disabled={isPending}
+                  >
                     Save Patient Record
                   </Button>
                 )}
@@ -222,34 +224,20 @@ const OPDPlanPage = () => {
                         </Link>
                       </Button>
 
-                      <Button
-                        type="button"
-                        className="my-button-blue"
-                        size="lg"
-                        disabled
-                      >
-                        Print The Plan
-                        <PrinterIcon className="size-4 ml-2" />
-                      </Button>
+                      <ReactToPrint
+                        trigger={() => (
+                          <Button
+                            type="button"
+                            className="my-button-blue"
+                            size="lg"
+                          >
+                            Print The Plan
+                            <PrinterIcon className="size-4 ml-2" />
+                          </Button>
+                        )}
+                        content={() => printableRef.current}
+                      />
                     </div>
-
-                    <div className="grid gap-2 mt-4">
-                      <Label htmlFor="Add a Follow-up">
-                        Existing patient with a follow up record?
-                      </Label>
-                      <Button
-                        type="button"
-                        className="my-button-blue"
-                        size="lg"
-                        asChild
-                      >
-                        <Link href={`/dashboard/add-patient-vitals?patientId=${patientId}&type=followUp`}>
-                          Add Follow-up Record
-                          <ArrowRight className="size-4 ml-2" />
-                        </Link>
-                      </Button>
-                    </div>
-
                   </div>
                 )}
               </div>
@@ -257,8 +245,22 @@ const OPDPlanPage = () => {
           </form>
         </Form>
       </CardContent>
-    </Card>
-  )
-}
 
-export default OPDPlanPage
+      {/* Hidden Printable Component */}
+      {formData && (
+        <div style={{ display: "none" }}>
+          <OPDPrintableComponent
+            ref={printableRef}
+            patientId={patientId!}
+            nextVisit={formData.nextVisit}
+            diagnosis={formData.diagnosis}
+            medication={formData.medication}
+            OPDNotes={formData.OPDNotes || ""}
+          />
+        </div>
+      )}
+    </Card>
+  );
+};
+
+export default OPDPlanPage;

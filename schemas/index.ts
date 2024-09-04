@@ -101,9 +101,9 @@ export const PatientInformationSchema = z.object({
 
 export const PatientVitalsSchema = z.object({
     pulseRate: z.number().min(0, "Pulse rate must be at least 0").max(300, "Pulse rate must be at most 300"),
-    bodyTemperature: z.string().min(3, "Body temperature is required"),
+    bodyTemperature: z.string().min(1, "Body temperature is required"),
     bloodPressure: z.string().min(3, "Blood pressure is required"),
-    weight: z.string().min(3, "Weight is required"),
+    weight: z.string().min(1, "Weight is required"),
     oxygen: z.number().min(0, "Oxygen level must be at least 0").max(100, "Oxygen level must be at most 100"),
     patientId: z.string().min(3, "Patient ID is required"),
 });
