@@ -101,11 +101,11 @@ export const PatientInformationSchema = z.object({
 
 export const PatientVitalsSchema = z.object({
     pulseRate: z.number().min(0, "Pulse rate must be at least 0").max(300, "Pulse rate must be at most 300"),
-    bodyTemperature: z.string().nonempty("Body temperature is required"),
-    bloodPressure: z.string().nonempty("Blood pressure is required"),
-    weight: z.string().nonempty("Weight is required"),
+    bodyTemperature: z.string().min(3, "Body temperature is required"),
+    bloodPressure: z.string().min(3, "Blood pressure is required"),
+    weight: z.string().min(3, "Weight is required"),
     oxygen: z.number().min(0, "Oxygen level must be at least 0").max(100, "Oxygen level must be at most 100"),
-    patientId: z.string().nonempty("Patient ID is required"),
+    patientId: z.string().min(3, "Patient ID is required"),
 });
 
 export const PatientHistorySchema = z.object({
@@ -129,18 +129,27 @@ export const PatientFollowUpsSchema = z.object({
     patientId: z.string(),
     vitalSignsId: z.string().optional(),
     labResults: z.string().optional(),
-    chiefComplaint: z.string().nonempty("Chief complaint is required"),
-    so: z.string().nonempty("Subjective observation is required"),
-    diagnosis: z.string().nonempty("Diagnosis is required"),
-    treatment: z.string().nonempty("Treatment is required"),
-    plan: z.string().nonempty("Plan is required"),
+    chiefComplaint: z.string().min(3, "Chief complaint is required"),
+    so: z.string().min(3, "Subjective observation is required"),
+    diagnosis: z.string().min(3, "Diagnosis is required"),
+    treatment: z.string().min(3, "Treatment is required"),
+    plan: z.string().min(3, "Plan is required"),
 });
 
 export const FollowUpPlanSchema = z.object({
     patientId: z.string(),
     recordId: z.string(),
-    nextVisit: z.string().nonempty("Next visit is required"),
+    nextVisit: z.string().min(3, "Next visit is required"),
     followUpNotes: z.string().optional(),
+});
+
+export const OPDPlanSchema = z.object({
+    patientId: z.string(),
+    recordId: z.string(),
+    nextVisit: z.string().min(3, "Next visit is required"),
+    OPDNotes: z.string().optional(),
+    medication: z.string().min(3, "Medication is required"),
+    diagnosis: z.string().min(3, "Diagnosis is required"),
 });
 
 export const searchQuerySchema = z.object({

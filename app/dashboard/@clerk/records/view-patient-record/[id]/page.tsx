@@ -60,7 +60,7 @@ const ViewPatientRecordPage = async ({ params }: { params: { id: string } }) => 
             <CardContent>
                 <div className='grid grid-cols-5 grid-flow-row gap-x-12'>
                     <div className='flex flex-col flex-shrink-0 gap-y-8'>
-                        <Avatar className='2xl:size-64 size-32 rounded-sm'>
+                        <Avatar className='2xl:size-60 xl:size-48 md:size-38 size-32 rounded-sm max-w-auto max-h-auto'>
                             <AvatarImage src={patient.imageURL ?? ''} />
                             <AvatarFallback className='rounded-sm'>
                                 <UserCircle2 className='size-24' />
@@ -73,10 +73,29 @@ const ViewPatientRecordPage = async ({ params }: { params: { id: string } }) => 
                         </div>
 
                         <div className='flex flex-col gap-y-3'>
-                            <div className='flex flex-row gap-4'>
-                                <h3 className='text-lg font-semibold'>
-                                    Last Visit
-                                </h3>
+                            <h3 className='text-lg font-semibold'>
+                                Last Visit
+                            </h3>
+                            <div className='text-gray text-sm'>
+                                {lastVisitParsed.toDateString()}
+                            </div>
+                        </div>
+
+                        <div className='flex flex-col gap-y-3'>
+                            <h3 className='text-lg font-semibold'>
+                                Next Visit
+                            </h3>
+
+                            <div className='text-gray text-sm'>
+                                {nextVisitParsed.toDateString()}
+                            </div>
+                        </div>
+
+                        <div className='flex flex-col gap-y-3'>
+                            <h3 className='text-lg font-semibold'>
+                                Patient Status
+                            </h3>
+                            <div>
                                 <Badge
                                     className='my-button-blue'
                                     variant="custom"
@@ -84,24 +103,9 @@ const ViewPatientRecordPage = async ({ params }: { params: { id: string } }) => 
                                     {patient.patientStatus}
                                 </Badge>
                             </div>
-
-                            <div className='text-gray text-sm'>
-                                {lastVisitParsed.toDateString()}
-                            </div>
-                        </div>
-
-                        <div className='flex flex-col gap-y-3'>
-                            <div className='flex flex-row gap-4'>
-                                <h3 className='text-lg font-semibold'>
-                                    Next Visit
-                                </h3>
-                            </div>
-
-                            <div className='text-gray text-sm'>
-                                {nextVisitParsed.toDateString()}
-                            </div>
                         </div>
                     </div>
+
 
                     {/* Right Side */}
                     <div className='flex flex-col col-span-4'>

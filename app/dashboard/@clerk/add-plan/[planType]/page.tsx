@@ -1,4 +1,5 @@
-import FollowUpPlanPage from '@/components/follow-up-plan'
+import FollowUpPlanPage from '@/components/plan-pages/follow-up-plan'
+import OPDPlanPage from '@/components/plan-pages/opd-plan'
 import React from 'react'
 
 const PlanInputPage = async ({ params } : { params: { planType: string }}) => {
@@ -13,7 +14,7 @@ const PlanInputPage = async ({ params } : { params: { planType: string }}) => {
 
     if (planType == "opd") {
         return (
-            <div>OPDPlanPage</div>
+            <OPDPlanPage/>
         )
     }
 

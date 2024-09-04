@@ -34,9 +34,9 @@ import { FormSuccess } from "@/components/form-success";
 import { Textarea } from "@/components/ui/textarea";
 
 import { FollowUpPlanSchema } from "@/schemas";
-import { saveFollowUpPlan } from "@/actions/save-follow-up-plan";
+import { saveFollowUpPlan } from "@/actions/plan-actions/save-follow-up-plan";
 import Link from "next/link";
-import { Label } from "./ui/label";
+import { Label } from "../ui/label";
 import { ArrowRight, Check, PrinterIcon } from "lucide-react";
 
 const FollowUpPlanPage = () => {
@@ -50,6 +50,7 @@ const FollowUpPlanPage = () => {
     const showContent = success || error === "Follow-up plan already exists.";
 
     const form = useForm<z.infer<typeof FollowUpPlanSchema>>({
+        resolver: zodResolver(FollowUpPlanSchema),
         defaultValues: {
             patientId: patientId ?? "",
             recordId: recordId ?? "",
@@ -82,9 +83,9 @@ const FollowUpPlanPage = () => {
     };
 
     return (
-        <Card className="p-8">
+        <Card className="p-4">
             <CardHeader>
-                <CardTitle>Patient Plan</CardTitle>
+                <CardTitle>Patient Follow-up Plan</CardTitle>
                 <CardDescription>
                     Fill up the form below to save plan for the previous record.
                 </CardDescription>

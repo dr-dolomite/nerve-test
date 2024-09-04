@@ -117,14 +117,14 @@ model PatientInformation {
   religion        String
   email           String?
   phone           String
-  lastVisit       DateTime     @default(now())
+  lastVisit       DateTime      @default(now())
   lastUpdate      DateTime
   imageURL        String?
 
   patientHistories  PatientHistory[]
   followUps         FollowUps[]
   PatientVitalSigns PatientVitalSigns[]
-  OPD               OPD[]
+  OPD               OPDPlan[]
   FollowUpPlan      FollowUpPlan[]
 
   @@map("patient_information")
@@ -168,7 +168,7 @@ model PatientHistory {
 
   patient     PatientInformation @relation(fields: [patientId], references: [id], onDelete: Cascade)
   vitalSigns  PatientVitalSigns? @relation(fields: [vitalSignsid], references: [id])
-  OPD         OPD[]
+  OPD         OPDPlan[]
   FolowUpPlan FollowUpPlan[]
 
   @@map("patient_histories")
@@ -188,7 +188,7 @@ model FollowUps {
 
   patient      PatientInformation @relation(fields: [patientId], references: [id], onDelete: Cascade)
   vitalSigns   PatientVitalSigns? @relation(fields: [vitalSignsId], references: [id])
-  OPD          OPD[]
+  OPD          OPDPlan[]
   FollowUpPlan FollowUpPlan[]
 
   @@map("follow_ups")
@@ -199,8 +199,8 @@ model FollowUps {
 model FollowUpPlan {
   id            String   @id @default(cuid())
   patientId     String
-  historyId     String? @unique
-  followUpId    String? @unique
+  historyId     String?  @unique
+  followUpId    String?  @unique
   date          DateTime
   nextVisit     DateTime
   followUpNotes String?
@@ -212,7 +212,7 @@ model FollowUpPlan {
   @@map("follow_up_plan")
 }
 
-model OPD {
+model OPDPlan {
   id           String   @id @default(cuid())
   patientId    String
   historyId    String?  @unique
@@ -220,6 +220,7 @@ model OPD {
   date         DateTime
   medication   String
   diagnosis    String
+  opdNotes     String?
   followUpDate DateTime
 
   patient        PatientInformation @relation(fields: [patientId], references: [id], onDelete: Cascade)
