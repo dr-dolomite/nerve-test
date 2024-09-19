@@ -123,7 +123,7 @@ const PatientInformationForm = () => {
             name: "",
             city: "",
             completeAddress: "",
-            age: "",
+            age: 1,
             sex: "",
             birthday: "",
             civilStatus: "",
@@ -164,6 +164,7 @@ const PatientInformationForm = () => {
                         }
                     })
                     .catch(() => {
+                        form.reset();
                         setError("An error occurred.");
                     });
             });
@@ -282,7 +283,9 @@ const PatientInformationForm = () => {
                                         <Input
                                             {...field}
                                             placeholder="Age"
+                                            // type="number"
                                             disabled={!!isPending || !!success}
+                                            onChange={(e) => field.onChange(Number(e.target.value))}
                                         />
                                     </FormControl>
                                     <FormMessage />
@@ -423,11 +426,22 @@ const PatientInformationForm = () => {
                                         Religion
                                     </FormLabel>
                                     <FormControl>
-                                        <Input
-                                            {...field}
-                                            placeholder="Religion"
-                                            disabled={!!isPending || !!success}
-                                        />
+                                        <Select disabled={!!isPending || !!success} onValueChange={field.onChange} defaultValue={field.value}>
+                                            <SelectTrigger>
+                                                <SelectValue placeholder="Choose Religion" />
+                                            </SelectTrigger>
+                                            <SelectContent
+                                            >
+                                                <SelectGroup>
+                                                    <SelectItem value="Catholic">Catholic</SelectItem>
+                                                    <SelectItem value="Islam">Islam</SelectItem>
+                                                    <SelectItem value="Christianity">Christianity</SelectItem>
+                                                    <SelectItem value="Hinduism">Hinduism</SelectItem>
+                                                    <SelectItem value="Buddhism">Buddhism</SelectItem>
+                                                    <SelectItem value="Other">Other</SelectItem>
+                                                </SelectGroup>
+                                            </SelectContent>
+                                        </Select>
                                     </FormControl>
                                     <FormMessage />
                                 </FormItem>

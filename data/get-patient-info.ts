@@ -68,7 +68,7 @@ export const getPatientVitalsById = async (id: string) => {
 }
 
 export const getAllPatientFollowUpById = async (id: string) => {
-    const patientFollowUp = await db.followUps.findMany({
+    const patientFollowUp = await db.patientFollowUps.findMany({
         where: {
             patientId: id
         },
@@ -78,7 +78,7 @@ export const getAllPatientFollowUpById = async (id: string) => {
 }
 
 export const getPatientFollowUpById = async (id: string) => {
-    const patientFollowUp = await db.followUps.findUnique({
+    const patientFollowUp = await db.patientFollowUps.findUnique({
         where: {
             id
         }
@@ -87,30 +87,30 @@ export const getPatientFollowUpById = async (id: string) => {
     return patientFollowUp;
 }
 
-export const getFollowUpPlanById = async (recordId: string) => {
+// export const getFollowUpPlanById = async (recordId: string) => {
 
-    // Check if the recordId corresponds to any FollowUpPlan followUpId
-    const followUp = await db.followUpPlan.findUnique({
-        where: {
-            followUpId: recordId
-        }
-    });
+//     // Check if the recordId corresponds to any FollowUpPlan followUpId
+//     const followUp = await db.followUpPlan.findUnique({
+//         where: {
+//             followUpId: recordId
+//         }
+//     });
 
-    // Check if the recordId corresponds to any FollowUpPlan patientHistoryId
-    const followUpHistory = await db.followUpPlan.findUnique({
-        where: {
-            historyId: recordId
-        }
-    });
+//     // Check if the recordId corresponds to any FollowUpPlan patientHistoryId
+//     const followUpHistory = await db.followUpPlan.findUnique({
+//         where: {
+//             historyId: recordId
+//         }
+//     });
 
-    if (followUp) {
-        return followUp;
-    }
+//     if (followUp) {
+//         return followUp;
+//     }
 
-    if (followUpHistory) {
-        return followUpHistory;
-    }
-}
+//     if (followUpHistory) {
+//         return followUpHistory;
+//     }
+// }
 
 export const getPatientInformationOnlyById = async (id: string) => {
     const patientInformation = await db.patientInformation.findUnique({

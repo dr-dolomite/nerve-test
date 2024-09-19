@@ -20,52 +20,124 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
+  FormDescription,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { FormError } from "@/components/form-error";
 import { FormSuccess } from "@/components/form-success";
 import { Textarea } from "@/components/ui/textarea";
-import { OPDPlanSchema } from "@/schemas";
+import { Checkbox } from "@/components/ui/checkbox";
+import { LaboratoryRequestSchema } from "@/schemas";
 
-import { saveOPDPlan } from "@/actions/plan-actions/save-opd-plan";
-import { fetchOPDPlan } from "@/actions/fetch-actions/fetch-opd";
+import { saveLabRequestForm } from "@/actions/plan-actions/save-lab-req";
+import { fetchLabRequestPlan } from "@/actions/fetch-actions/fetch-lab";
 
-import Link from "next/link";
-import { ArrowRightIcon, Check, PrinterIcon } from "lucide-react";
-import OPDPrintableComponent from "@/components/printables/opd-form";
+import { ArrowRightIcon, PrinterIcon } from "lucide-react";
+import LabRequestFormPrintable from "@/components/printables/lab-req-form";
 
-interface OPDPlanPageProps {
+interface LabRequestFormProps {
   patientPlanId: string | null;
   patientId: string;
 }
 
-const OPDPlanPage = ({ patientPlanId, patientId }: OPDPlanPageProps) => {
+const LabRequestForm = ({ patientPlanId, patientId }: LabRequestFormProps) => {
   const [error, setError] = useState<string | undefined>("");
   const [success, setSuccess] = useState<string | undefined>("");
-  const [isUpdate, setUpdate] = useState(false)
+  const [isUpdate, setUpdate] = useState(false);
   const [isPending, startTransition] = useTransition();
   const patientPlanIdValue = patientPlanId ?? "";
 
+  const labItems = [
+    {
+      id: "1",
+      label: "FBS",
+    },
+    {
+      id: "2",
+      label: "Urinalysis",
+    },
+    {
+      id: "3",
+      label: "BUN",
+    },
+    {
+      id: "4",
+      label: "Creatinine",
+    },
+    {
+      id: "5",
+      label: "CXR PA View",
+    },
+    {
+      id: "6",
+      label: "Uric Acid",
+    },
+    {
+      id: "7",
+      label: "ECG (12 Leads)",
+    },
+    {
+      id: "8",
+      label: "Lipid Profile",
+    },
+    {
+      id: "9",
+      label: "T4",
+    },
+    {
+      id: "10",
+      label: "SGPT",
+    },
+    {
+      id: "11",
+      label: "T3",
+    },
+    {
+      id: "12",
+      label: "HbA1c",
+    },
+    {
+      id: "13",
+      label: "TSH",
+    },
+    {
+      id: "14",
+      label: "Na, K",
+    },
+    {
+      id: "15",
+      label: "CBC",
+    },
+    {
+      id: "16",
+      label: "Serum Triglycerides",
+    },
+    {
+      id: "17",
+      label: "Platelet Count",
+    },
+  ];
+
   const [formData, setFormData] = useState<z.infer<
-    typeof OPDPlanSchema
+    typeof LaboratoryRequestSchema
   > | null>(null);
 
-  const form = useForm<z.infer<typeof OPDPlanSchema>>({
-    resolver: zodResolver(OPDPlanSchema),
+  const form = useForm<z.infer<typeof LaboratoryRequestSchema>>({
+    resolver: zodResolver(LaboratoryRequestSchema),
     defaultValues: {
       patientPlanId: patientPlanIdValue,
-      nextVisit: "",
-      diagnosis: "",
-      medication: "",
-      OPDNotes: "",
+      dateToBeTaken: "",
+      followUpDate: "",
+      notes: "",
+      laboratoryTests: [],
     },
   });
 
   useEffect(() => {
     if (patientPlanId) {
       startTransition(() => {
-        fetchOPDPlan(patientPlanId)
+        fetchLabRequestPlan(patientPlanId)
           .then((data) => {
             if (data.error) {
               setError(data.error);
@@ -84,12 +156,12 @@ const OPDPlanPage = ({ patientPlanId, patientId }: OPDPlanPageProps) => {
     }
   }, [patientPlanId, form]);
 
-  const onSubmit = (values: z.infer<typeof OPDPlanSchema>) => {
+  const onSubmit = (values: z.infer<typeof LaboratoryRequestSchema>) => {
     setError("");
     setSuccess("");
 
     startTransition(() => {
-      saveOPDPlan(values)
+      saveLabRequestForm(values)
         .then((data) => {
           if (data?.error) {
             setError(data.error);
@@ -112,9 +184,11 @@ const OPDPlanPage = ({ patientPlanId, patientId }: OPDPlanPageProps) => {
   return (
     <Card className="p-4 mt-6">
       <CardHeader>
-        <CardTitle>Patient OPD Plan</CardTitle>
+        <CardTitle>Laboratory Request Form</CardTitle>
         <CardDescription>
-        {patientPlanId ? "Update the existing OPD plan." : "Create a new OPD plan."}
+          {patientPlanId
+            ? "Update the existing OPD plan."
+            : "Create a new OPD plan."}
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -123,17 +197,16 @@ const OPDPlanPage = ({ patientPlanId, patientId }: OPDPlanPageProps) => {
             className="grid 2xl:grid-cols-3 grid-cols-1 grid-flow-row gap-8"
             onSubmit={form.handleSubmit(onSubmit)}
           >
-            <div className="2xl:col-span-3 col-span-1 max-w-screen-md">
+            <div className="col-span-1 max-w-screen-md">
               <FormField
                 control={form.control}
-                name="nextVisit"
+                name="dateToBeTaken"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Schedule Next Visit</FormLabel>
+                    <FormLabel>Date to be Taken</FormLabel>
                     <FormControl>
                       <Input
                         {...field}
-                        placeholder="Referral name"
                         type="date"
                         disabled={isPending}
                         className="max-w-sm"
@@ -145,19 +218,19 @@ const OPDPlanPage = ({ patientPlanId, patientId }: OPDPlanPageProps) => {
               />
             </div>
 
-            <div className="col-span-1">
+            <div className="col-span-1 max-w-screen-md">
               <FormField
                 control={form.control}
-                name="diagnosis"
+                name="followUpDate"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Diagnosis</FormLabel>
+                    <FormLabel>Follow Up Date</FormLabel>
                     <FormControl>
-                      <Textarea
+                      <Input
                         {...field}
-                        placeholder="Type your follow up notes here ..."
+                        type="date"
                         disabled={isPending}
-                        className="h-64"
+                        className="max-w-sm"
                       />
                     </FormControl>
                     <FormMessage />
@@ -166,38 +239,75 @@ const OPDPlanPage = ({ patientPlanId, patientId }: OPDPlanPageProps) => {
               />
             </div>
 
-            <div className="col-span-1">
+            <div className="col-span-3">
               <FormField
                 control={form.control}
-                name="medication"
-                render={({ field }) => (
+                name="laboratoryTests"
+                render={() => (
                   <FormItem>
-                    <FormLabel>Medication</FormLabel>
-                    <FormControl>
-                      <Textarea
-                        {...field}
-                        placeholder="Type your follow up notes here ..."
-                        disabled={isPending}
-                        className="h-64"
-                      />
-                    </FormControl>
+                    <div className="mb-6">
+                      <FormLabel className="text-base">
+                        Laboratory Tests
+                      </FormLabel>
+                      <FormDescription>
+                        Select the items you want to include.
+                      </FormDescription>
+                    </div>
+                    <div className="grid xl:grid-cols-3 grid-cols-1 2xl:gap-8 gap-6 grid-flow-row container mx-auto">
+                      {labItems.map((item) => (
+                        <FormField
+                          key={item.id}
+                          control={form.control}
+                          name="laboratoryTests"
+                          render={({ field }) => {
+                            return (
+                              <FormItem
+                                key={item.id}
+                                className="flex flex-row items-start space-x-3 space-y-0"
+                              >
+                                <FormControl>
+                                  <Checkbox
+                                    checked={field.value?.includes(item.id)}
+                                    onCheckedChange={(checked) => {
+                                      return checked
+                                        ? field.onChange([
+                                            ...field.value,
+                                            item.id,
+                                          ])
+                                        : field.onChange(
+                                            field.value?.filter(
+                                              (value) => value !== item.id
+                                            )
+                                          );
+                                    }}
+                                  />
+                                </FormControl>
+                                <FormLabel className="text-md font-normal">
+                                  {item.label}
+                                </FormLabel>
+                              </FormItem>
+                            );
+                          }}
+                        />
+                      ))}
+                    </div>
                     <FormMessage />
                   </FormItem>
                 )}
               />
             </div>
 
-            <div className="col-span-1">
+            <div className="2xl:col-span-3 col-span-1">
               <FormField
                 control={form.control}
-                name="OPDNotes"
+                name="notes"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Special Notes for OPD</FormLabel>
+                    <FormLabel>Others, specify</FormLabel>
                     <FormControl>
                       <Textarea
                         {...field}
-                        placeholder="Type your follow up notes here ..."
+                        placeholder="Type something here..."
                         disabled={isPending}
                         className="h-64"
                       />
@@ -222,12 +332,14 @@ const OPDPlanPage = ({ patientPlanId, patientId }: OPDPlanPageProps) => {
                     size="lg"
                     disabled={isPending}
                   >
-                    {isUpdate ? "Update OPD Plan Record" : "Save OPD Plan Record"}
+                    {isUpdate
+                      ? "Update laboratory Request Form"
+                      : "Save Laboratory Request Form"}
                     <ArrowRightIcon className="size-4 ml-2" />
                   </Button>
                 )}
 
-                {success && (
+                {success || isUpdate && (
                   <div className="grid grid-cols-1 grid-flow-row gap-8">
                     <div className="max-w-sm flex flex-row items-center gap-x-6">
                       <ReactToPrint
@@ -237,7 +349,7 @@ const OPDPlanPage = ({ patientPlanId, patientId }: OPDPlanPageProps) => {
                             className="my-button-blue"
                             size="lg"
                           >
-                            Print The Plan
+                            Print Laboratory Request Form
                             <PrinterIcon className="size-4 ml-2" />
                           </Button>
                         )}
@@ -255,13 +367,13 @@ const OPDPlanPage = ({ patientPlanId, patientId }: OPDPlanPageProps) => {
       {/* Hidden Printable Component */}
       {formData && (
         <div style={{ display: "none" }}>
-          <OPDPrintableComponent
+          <LabRequestFormPrintable
             ref={printableRef}
             patientId={patientId!}
-            nextVisit={formData?.nextVisit || ""}
-            diagnosis={formData?.diagnosis || ""}
-            medication={formData?.medication || ""}
-            OPDNotes={formData?.OPDNotes || ""}
+            dateToTaken={formData?.dateToBeTaken || ""}
+            clinicFollowUp={formData?.followUpDate || ""}
+            otherTests={formData?.notes || ""}
+            selectedTests={formData?.laboratoryTests || []}
           />
         </div>
       )}
@@ -269,4 +381,4 @@ const OPDPlanPage = ({ patientPlanId, patientId }: OPDPlanPageProps) => {
   );
 };
 
-export default OPDPlanPage;
+export default LabRequestForm;

@@ -62,7 +62,6 @@ const PatientHistoryForm = () => {
 
   const [error, setError] = useState<string | undefined>("");
   const [success, setSuccess] = useState<string | undefined>("");
-  const [planType, setPlanType] = useState<string | undefined>("");
   const [patientHistoryRecordId, setPatientHistoryRecordId] = useState<string | undefined>("");
   const [isPending, startTransition] = useTransition();
   const searchParams = useSearchParams();
@@ -85,8 +84,7 @@ const PatientHistoryForm = () => {
       physicalExamination: "",
       neurologicalExamination: "",
       diagnosis: "",
-      treatmentPlan: "",
-      plan: "",
+      labResults: "",
     },
   });
 
@@ -105,7 +103,6 @@ const PatientHistoryForm = () => {
           if (data?.success) {
             form.reset();
             setSuccess(data.success);
-            setPlanType(data.plan);
             setPatientHistoryRecordId(data.patientHistoryId);
           }
         })
@@ -334,57 +331,27 @@ const PatientHistoryForm = () => {
               )}
             />
 
-            <FormField
-              control={form.control}
-              name="treatmentPlan"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>
-                    Treatment
-                  </FormLabel>
-                  <FormControl>
-                    <Textarea
-                      placeholder="Type here..."
-                      disabled={!!isPending || !!success}
-                      className="h-36 font-medium focus:ring-2 focus:ring-[#2F80ED] focus:ring-opacity-60"
-                      {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <div className="max-w-sm">
+            <div className="col-span-2">
               <FormField
                 control={form.control}
-                name="plan"
+                name="labResults"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>
-                      Plan
+                      Lab Result
                     </FormLabel>
                     <FormControl>
-                      <Select disabled={!!isPending || !!success} onValueChange={field.onChange} defaultValue={field.value}>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Choose Plan" />
-                        </SelectTrigger>
-                        <SelectContent
-                        >
-                          <SelectGroup>
-                            <SelectItem value="follow-up">Follow Up</SelectItem>
-                            <SelectItem value="opd">OPD</SelectItem>
-                            <SelectItem value="admit">Admit</SelectItem>
-                            <SelectItem value="referral">Referred To</SelectItem>
-                          </SelectGroup>
-                        </SelectContent>
-                      </Select>
+                      <Textarea
+                        placeholder="Type here..."
+                        disabled={!!isPending || !!success}
+                        className="h-44 font-medium focus:ring-2 focus:ring-[#2F80ED] focus:ring-opacity-60"
+                        {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
             </div>
-
 
             <div className="flex flex-col mt-4 col-span-2 gap-y-4">
               <div className="text-center">
@@ -399,7 +366,8 @@ const PatientHistoryForm = () => {
                     className="my-button-blue"
                     size="lg"
                     disabled={isPending}>
-                    Save Patient History
+                    Save and Proceed to Plan Information
+                    <ArrowRight className="size-4 ml-2" />
                   </Button>
                 )}
 
@@ -410,7 +378,7 @@ const PatientHistoryForm = () => {
                     className="my-button-blue"
                     size="lg"
                   >
-                    <Link href={`/dashboard/add-plan/${planType}?patientId=${patientId}&id=${patientHistoryRecordId}`}>
+                    <Link href={`/dashboard/add-plan?patientId=${patientId}&recordId=${patientHistoryRecordId}`}>
                       Add Patient Plan Information
                       <ArrowRight className="size-4 ml-2" />
                     </Link>
@@ -425,7 +393,7 @@ const PatientHistoryForm = () => {
                       className="my-button-blue"
                       size="lg"
                     >
-                      <Link href={`/dashboard/add-patient-vitals?patientId=${patientId}&type="followUp"`}>
+                      <Link href={`/dashboard/add-patient-vitals?patientId=${patientId}&type="follow-up"`}>
                         Add Patient Follow-up
                       </Link>
                     </Button>

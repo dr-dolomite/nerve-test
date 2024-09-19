@@ -73,6 +73,34 @@ const PatientFollowupForm = () => {
     },
   });
 
+  // if vitalSignsId is not present, redirect to add-patient-vitals
+  if (!vitalSignsId) {
+    return (
+      <Card className="p-8">
+        <CardHeader>
+          <CardTitle>Patient Follow-up</CardTitle>
+          <CardDescription>
+            Vitals not found. Please add patient vitals first.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="flex flex-row 2xl:gap-x-12 gap-x-8 mt-4">
+            <Button
+              type="button"
+              asChild
+              className="my-button-blue"
+              size="lg"
+            >
+              <Link href={`/dashboard/add-patient-vitals?patientId=${patientId}&type="follow-up`}>
+                Add Patient Vitals
+              </Link>
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+    )
+  }
+
   const onSubmit = (values: z.infer<typeof PatientFollowUpsSchema>) => {
     setError("");
     setSuccess("");
@@ -241,7 +269,6 @@ const PatientFollowupForm = () => {
                         >
                           <SelectGroup>
                             <SelectItem value="follow-up">Follow Up</SelectItem>
-                            <SelectItem value="opd">OPD</SelectItem>
                             <SelectItem value="admit">Admit</SelectItem>
                             <SelectItem value="referral">Referred To</SelectItem>
                           </SelectGroup>

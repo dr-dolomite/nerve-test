@@ -12,8 +12,7 @@ export const saveOPDPlan = async (values: z.infer<typeof OPDPlanSchema>) => {
     }
 
     const {
-        patientId,
-        recordId,
+        patientPlanId,
         diagnosis,
         medication,
         OPDNotes,
@@ -21,6 +20,9 @@ export const saveOPDPlan = async (values: z.infer<typeof OPDPlanSchema>) => {
     } = validatedFields.data;
 
     // Parse the next visit date
+    if (!nextVisit) {
+        return { error: "Next visit date is required." };
+    }
     const nextVisitDate = new Date(nextVisit);
 
     // If the next visit date is before or equal to today
@@ -28,95 +30,52 @@ export const saveOPDPlan = async (values: z.infer<typeof OPDPlanSchema>) => {
         return { error: "Next visit date should be in the future." };
     }
 
-    // Check if the patient exists
-    const patient = await db.patientInformation.findUnique({
+    // Current Date
+    const currentDate = new Date();
+
+    // Check if the OPD plan already exists on the patient plan
+    const existingOPDPlan = await db.oPDPlanForm.findFirst({
         where: {
-            id: patientId,
+            PatientPlan: {
+                id: patientPlanId,
+            },
         },
     });
 
-    if (!patient) {
-        return { error: "Patient not found" };
+    if (existingOPDPlan) {
+        // Update the record instead of creating a new one. Also make the data optional since the user only updates one field sometimes.
+
+        await db.oPDPlanForm.update({
+            where: {
+                id: existingOPDPlan.id,
+            },
+            data: {
+                diagnosis,
+                medication,
+                specialInstruction: OPDNotes,
+                followUpDate: nextVisitDate,
+                currentDate,
+            },
+        });
+
+        return { success: "OPD plan updated. Please proceed." };
     }
-
-    // Check if the record exists
-    const followUpId = await db.followUps.findUnique({
-        where: {
-            id: recordId,
-        },
-    });
-
-    const historyId = await db.patientHistory.findUnique({
-        where: {
-            id: recordId,
-        },
-    });
-
-    if (!followUpId && !historyId) {
-        return { error: "Record not found" };
-    }
-
-    // check if follow up plan already exists
     
-    // Check if a follow-up plan already exists for this record
-    const existingPlan = await db.followUpPlan.findFirst({
-        where: {
-            OR: [
-                { followUpId: recordId },
-                { historyId: recordId }
-            ]
+    // Save the record
+    await db.oPDPlanForm.create({
+        data: {
+            PatientPlan: {
+                connect: {
+                    id: patientPlanId,
+                },
+            },
+            diagnosis,
+            medication,
+            specialInstruction: OPDNotes,
+            followUpDate: nextVisitDate,
+            currentDate,
         }
     });
-
-    if (existingPlan) {
-        return { error: "Follow-up plan already exists." };
-    }
-
-    // Save the follow-up plan
-
-    if(!followUpId) {
-        await db.oPDPlan.create({
-            data:{
-                patient: {
-                    connect: {
-                        id: patientId,
-                    },
-                },
-                PatientHistory: {
-                    connect: {
-                        id: recordId,
-                    },
-                },
-                diagnosis,
-                medication,
-                opdNotes: OPDNotes,
-                followUpDate: nextVisitDate,
-                date: new Date(),
-            }
-        })
-    }
-
-    if (!historyId) {
-        await db.oPDPlan.create({
-            data:{
-                patient: {
-                    connect: {
-                        id: patientId,
-                    },
-                },
-                FollowUps: {
-                    connect: {
-                        id: recordId,
-                    },
-                },
-                diagnosis,
-                medication,
-                opdNotes: OPDNotes,
-                followUpDate: nextVisitDate,
-                date: new Date(),
-            }
-        })
-    }
 
     return { success: "OPD plan saved. Please proceed." };
 };

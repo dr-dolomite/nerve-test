@@ -1,5 +1,7 @@
 import * as z from 'zod';
 
+const today = new Date();
+
 export const LoginSchema = z.object({
     email: z.string().email({
         message: 'Invalid email address',
@@ -44,58 +46,32 @@ export const NewPasswordSchema = z.object({
 });
 
 export const PatientInformationSchema = z.object({
-    name: z.string().min(3, {
+    name: z.string().min(5, {
         message: 'Full name is required',
     }),
-
-    city: z.string().min(3, {
-        message: 'City is required',
-    }),
-
-    completeAddress: z.string().min(3, {
-        message: 'Complete address is required',
-    }),
-
-    age: z.string().min(1, {
+    city: z.string().optional(),
+    completeAddress: z.string().optional(),
+    age: z.number({
+        message: 'Age must be a number.',
+    }).min(1, {
         message: 'Age is required',
+    }).max(130, {
+        message: 'That seems to be incorrect.',
     }),
-
     sex: z.string().min(3, {
         message: 'Sex is required',
     }),
-
-    birthday: z.string().min(3, {
-        message: 'Birthday is required',
-    }),
-
-    civilStatus: z.string().min(3, {
-        message: 'Civil Status is required',
-    }),
-
-    occupation: z.string().min(3, {
-        message: 'Occupation is required',
-    }),
-
+    birthday: z.string().optional(),
+    civilStatus: z.string().optional(),
+    occupation: z.string().optional(),
     handedness: z.string().min(3, {
         message: 'Handedness is required',
     }),
-
-    religion: z.string().min(3, {
-        message: 'Religion is required',
-    }),
-
-    phone: z.string().min(3, {
-        message: 'Contact is required',
-    }),
-
+    religion: z.string().optional(),
+    phone: z.string().optional(),
     email: z.string().optional(),
-
-    lastVisit: z.string().min(3, {
-        message: 'Last visit is required',
-    }),
-
-    imageUrl : z.string().optional(),
-
+    lastVisit: z.string().optional(),
+    imageUrl: z.string().optional(),
     id: z.string().optional(),
 });
 
@@ -121,8 +97,7 @@ export const PatientHistorySchema = z.object({
     physicalExamination: z.string().min(3, "Physical examination is required"),
     neurologicalExamination: z.string().optional(),
     diagnosis: z.string().min(3, "Diagnosis is required"),
-    treatmentPlan: z.string().optional(),
-    plan: z.string().min(3, "Plan is required"),
+    labResults: z.string().optional(),
 });
 
 export const PatientFollowUpsSchema = z.object({
@@ -136,20 +111,30 @@ export const PatientFollowUpsSchema = z.object({
     plan: z.string().min(3, "Plan is required"),
 });
 
-export const FollowUpPlanSchema = z.object({
+export const PatientPlanSchema = z.object({
+    planId: z.string(),
     patientId: z.string(),
     recordId: z.string(),
-    nextVisit: z.string().min(3, "Next visit is required"),
-    followUpNotes: z.string().optional(),
+    nextVisit: z.string().optional(),
+    medication: z.string().optional(),
+    specialNotes: z.string().optional(),
+    planItems: z.array(z.string())
 });
 
 export const OPDPlanSchema = z.object({
-    patientId: z.string(),
-    recordId: z.string(),
-    nextVisit: z.string().min(3, "Next visit is required"),
+    patientPlanId: z.string(),
+    nextVisit: z.string().optional(),
+    diagnosis: z.string().optional(),
+    medication: z.string().optional(),
     OPDNotes: z.string().optional(),
-    medication: z.string().min(3, "Medication is required"),
-    diagnosis: z.string().min(3, "Diagnosis is required"),
+});
+
+export const LaboratoryRequestSchema = z.object({
+    patientPlanId: z.string(),
+    dateToBeTaken: z.string().optional(),
+    followUpDate: z.string().optional(),
+    laboratoryTests: z.array(z.string()),
+    notes: z.string().optional(),
 });
 
 export const searchQuerySchema = z.object({

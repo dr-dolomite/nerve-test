@@ -29,22 +29,13 @@ export const savePatientInfo = async (values: z.infer<typeof PatientInformationS
         imageUrl,
     } = validatedFields.data;
 
-    const parsedBirthday = new Date(birthday);
+    const parsedBirthday = birthday ? new Date(birthday) : null;
 
-    if (isNaN(parsedBirthday.getTime())) {
-        return { error: "Invalid date format." };
-    }
-    
-    // If birthday is greater than or equal than today, return error
-    if (parsedBirthday >= new Date()) {
-        return { error: "Birthday must be less than today." };
+    if (parsedBirthday != null && parsedBirthday >= new Date()) {
+        return { error: "Birthday cannot be in the future." };
     }
 
-    const parsedLastVisit = new Date(lastVisit);
-
-    if (isNaN(parsedLastVisit.getTime())) {
-        return { error: "Invalid date format." };
-    }
+    const parsedLastVisit = lastVisit ? new Date(lastVisit) : null;
 
     const existingPatient = await getPatientByName(name);
 

@@ -26,8 +26,7 @@ export const savePatientHistory = async (values: z.infer<typeof PatientHistorySc
         physicalExamination,
         neurologicalExamination,
         diagnosis,
-        treatmentPlan,
-        plan,
+        labResults,
     } = validatedFields.data;
 
     // Check if the patient exists
@@ -86,11 +85,10 @@ export const savePatientHistory = async (values: z.infer<typeof PatientHistorySc
             physicalExamination,
             neurologicalExamination,
             diagnosis,
-            treatmentPlan,
-            plan,
+            labResults,
             date: new Date(),
         },
     });
 
-    return { success: "Patient history saved.", patientHistoryId: newPatientHistory.id, plan };
+    return { success: "Patient history saved.", patientHistoryId: newPatientHistory.id };
 };
