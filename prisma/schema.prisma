@@ -120,11 +120,13 @@ model PatientInformation {
   lastVisit       DateTime?     @default(now())
   lastUpdate      DateTime
   imageURL        String?
+  isNewPatient    Boolean       @default(true)
 
   patientHistories  PatientHistory[]
   followUps         PatientFollowUps[]
   PatientVitalSigns PatientVitalSigns[]
   PatientPlan       PatientPlan[]
+  QueueEntry        QueueEntry?
 
   @@map("patient_information")
 }
@@ -235,4 +237,40 @@ model LabRequestForm {
   PatientPlan     PatientPlan @relation(fields: [patientPlanId], references: [id], onDelete: Cascade)
 
   @@map("lab_request_form")
+}
+
+// Queue System Models
+enum QueueStatus {
+  WAITING
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+}
+
+model Queue {
+  id        String       @id @default(cuid())
+  name      String       @unique
+  isActive  Boolean      @default(true)
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
+  entries   QueueEntry[]
+
+  @@map("queues")
+}
+
+model QueueEntry {
+  id                String      @id @default(cuid())
+  queueId           String
+  patientId         String      @unique
+  status            QueueStatus @default(WAITING)
+  position          Int
+  estimatedWaitTime Int?
+  notes             String?
+  createdAt         DateTime    @default(now())
+  updatedAt         DateTime    @updatedAt
+
+  queue   Queue              @relation(fields: [queueId], references: [id], onDelete: Cascade)
+  patient PatientInformation @relation(fields: [patientId], references: [id], onDelete: Cascade)
+
+  @@map("queue_entries")
 }

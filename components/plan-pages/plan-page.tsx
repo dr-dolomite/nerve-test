@@ -100,7 +100,7 @@ const PlanInformationPage = () => {
     },
   ];
 
-  // TODO: Retain the checked items even if redirected to another page. Also, change the paperclip icon to a different icon like checkmark when the form was already filled out.
+  // TODO: Queue and add new patient
 
   const searchParams = useSearchParams();
   const router = useRouter();
