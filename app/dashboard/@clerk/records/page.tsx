@@ -12,7 +12,6 @@ import {
 } from "lucide-react"
 import { Badge } from "@/components/ui/badge";
 
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
 import { Button } from "@/components/ui/button"
 import {
   Card,
@@ -56,7 +55,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 
 interface Patient {
   name: string;
-  city: string;
+  city: string | null;
   phone: string | null;
   patientStatus: string;
   lastUpdate: Date;

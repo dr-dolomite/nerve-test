@@ -1,11 +1,12 @@
 "use client";
 
 import * as z from "zod";
-import { useTransition, useState, useEffect } from "react";
+import { useTransition, useState, useEffect, useCallback } from "react";
 
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 
 import {
   Sheet,
@@ -42,14 +43,22 @@ import { FormSuccess } from "@/components/form-success";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import Link from "next/link";
-import { XIcon, ArrowRight, PaperclipIcon, CheckIcon } from "lucide-react";
+import {
+  ArrowRight,
+  PaperclipIcon,
+  CheckIcon,
+  PenLineIcon,
+  Trash2Icon,
+  NotepadText,
+} from "lucide-react";
 
 import { PatientPlanSchema } from "@/schemas";
 import { savePatientPlan } from "@/actions/plan-actions/save-patient-plan";
 import { updatePatientPlan } from "@/actions/plan-actions/update-patient-plan";
-import { fetchOPDPlan } from "@/actions/fetch-actions/fetch-opd";
+import { fetchPlanDetails } from "@/actions/fetch-actions/fetch-plan-details";
 import OPDPlanPage from "@/components/plan-pages/opd-plan";
 import LabRequestForm from "@/components/plan-pages/lab-request-form";
+import { deletePatientPlan } from "@/actions/plan-actions/delete/delete-patient-plan";
 
 const PlanInformationPage = () => {
   const planItems = [
@@ -94,32 +103,20 @@ const PlanInformationPage = () => {
   // TODO: Retain the checked items even if redirected to another page. Also, change the paperclip icon to a different icon like checkmark when the form was already filled out.
 
   const searchParams = useSearchParams();
+  const router = useRouter();
   const patientId = searchParams.get("patientId") ?? "";
   const recordId = searchParams.get("recordId") ?? "";
   const [error, setError] = useState<string | undefined>("");
   const [success, setSuccess] = useState<string | undefined>("");
   const [isPending, startTransition] = useTransition();
   const [planId, setPlanId] = useState<string | null>(null);
-  const [hasOPDPlan, setHasOPDPlan] = useState(false);
-
-  const checkOPDPlanExistence = async (planId: string) => {
-    try {
-      const result = await fetchOPDPlan(planId);
-      const opdPlanExists = !!result.success;
-      setHasOPDPlan(opdPlanExists);
-
-      // Auto-check the OPD checkbox if the plan exists
-      if (opdPlanExists) {
-        const currentPlanItems = form.getValues("planItems");
-        if (!currentPlanItems.includes("8")) {
-          form.setValue("planItems", [...currentPlanItems, "8"]);
-        }
-      }
-    } catch (error) {
-      console.error("Error checking OPD plan existence:", error);
-      setHasOPDPlan(false);
-    }
-  };
+  const [medication, setMedication] = useState<string | undefined>(undefined);
+  const [nextVisit, setNextVisit] = useState<string | undefined>(undefined);
+  const [specialNotes, setSpecialNotes] = useState<string | undefined>(
+    undefined
+  );
+  const [isDeleted, setIsDeleted] = useState(false);
+  const [isUpdated, setIsUpdated] = useState(false);
 
   const form = useForm<z.infer<typeof PatientPlanSchema>>({
     resolver: zodResolver(PatientPlanSchema),
@@ -134,48 +131,41 @@ const PlanInformationPage = () => {
     },
   });
 
-  useEffect(() => {
-    if (!planId) {
-      startTransition(() => {
-        savePatientPlan({
-          patientId,
-          recordId,
-          planId: "",
-          planItems: [],
-          nextVisit: "",
-          specialNotes: "",
-          medication: "",
-        })
-          .then((data) => {
-            if (data?.error) {
-              setError(data.error);
-            } else if (data?.success && data.planId) {
-              setPlanId(data.planId);
-              checkOPDPlanExistence(data.planId);
-            }
-          })
-          .catch(() => {
-            setError("An error occurred.");
-          });
-      });
-    } else {
-      checkOPDPlanExistence(planId);
-    }
-  }, [patientId, recordId, planId]); // !ESLint warning to fix
-
   const onUpdate = (values: z.infer<typeof PatientPlanSchema>) => {
+    if (!planId) {
+      setError("Plan ID not initialized. Please try again.");
+      return;
+    }
+
     setError("");
     setSuccess("");
 
+    // Construct updatedValues without undefined or empty values
+    const updatedValues: any = {
+      ...values,
+      planId,
+    };
+
+    if (specialNotes) {
+      updatedValues.specialNotes = specialNotes;
+    }
+
+    if (nextVisit) {
+      updatedValues.nextVisit = nextVisit;
+    }
+
+    if (medication) {
+      updatedValues.medication = medication;
+    }
+
     startTransition(() => {
-      updatePatientPlan(values)
+      updatePatientPlan(updatedValues)
         .then((data) => {
           if (data?.error) {
             setError(data.error);
           }
 
           if (data?.success) {
-            form.reset();
             setSuccess(data.success);
           }
         })
@@ -184,6 +174,101 @@ const PlanInformationPage = () => {
         });
     });
   };
+
+  const onReset = () => {
+    deletePatientPlan(planId ?? "", recordId)
+      .then((data) => {
+        if (data?.error) {
+          setError(data.error);
+        } else if (data?.success) {
+          setSuccess(data.success);
+          setIsDeleted(true);
+          // Reset state variables
+          setMedication(undefined);
+          setNextVisit(undefined);
+          setSpecialNotes(undefined);
+          setPlanId(null);
+          setIsUpdated(false);
+          form.reset({
+            planId: "",
+            patientId: patientId ?? "",
+            recordId: recordId ?? "",
+            nextVisit: "",
+            specialNotes: "",
+            medication: "",
+            planItems: [],
+          });
+          router.refresh();
+        }
+      })
+      .catch(() => {
+        setError("An error occurred.");
+      });
+  };
+
+  const fetchPlanDetailsAndSetFields = useCallback(
+    async (planId: string) => {
+      const data = await fetchPlanDetails(planId);
+
+      if (data?.error) {
+        setError(data.error);
+      } else if (data?.success && data.data) {
+        const { medication, specialNotes, nextVisit, planItems } = data.data;
+        setMedication(medication);
+        setSpecialNotes(specialNotes);
+        setNextVisit(nextVisit);
+        form.reset({
+          planId,
+          patientId,
+          recordId,
+          nextVisit,
+          specialNotes,
+          medication,
+          planItems,
+        });
+
+        // Automatically check the plan items
+        form.setValue("planItems", planItems);
+
+        // Set the updated state to true if planItems is not empty
+        if (planItems.length > 0) {
+          setIsUpdated(true);
+        }
+      }
+    },
+    [form, patientId, recordId]
+  );
+
+  useEffect(() => {
+    const initializePlan = async () => {
+      if (!planId) {
+        try {
+          const data = await savePatientPlan({
+            patientId,
+            recordId,
+            planId: "",
+            planItems: [],
+            nextVisit: "",
+            specialNotes: "",
+            medication: "",
+          });
+
+          if (data?.error) {
+            setError(data.error);
+          } else if (data?.success && data.planId) {
+            setPlanId(data.planId);
+            await fetchPlanDetailsAndSetFields(data.planId);
+          }
+        } catch (error) {
+          setError("An error occurred.");
+        }
+      } else {
+        await fetchPlanDetailsAndSetFields(planId);
+      }
+    };
+
+    initializePlan();
+  }, [patientId, recordId, planId, fetchPlanDetailsAndSetFields]);
 
   const selectedPlanItems = form.watch("planItems");
 
@@ -223,16 +308,13 @@ const PlanInformationPage = () => {
                                 <Checkbox
                                   checked={field.value?.includes(item.id)}
                                   onCheckedChange={(checked) => {
-                                    return checked
-                                      ? field.onChange([
-                                          ...field.value,
-                                          item.id,
-                                        ])
-                                      : field.onChange(
-                                          field.value?.filter(
-                                            (value) => value !== item.id
-                                          )
+                                    const updatedValue = checked
+                                      ? [...field.value, item.id]
+                                      : field.value?.filter(
+                                          (value) => value !== item.id
                                         );
+                                    field.onChange(updatedValue);
+                                    form.setValue("planItems", updatedValue);
                                   }}
                                 />
                               </FormControl>
@@ -311,6 +393,10 @@ const PlanInformationPage = () => {
                                   <FormControl>
                                     <Textarea
                                       {...field}
+                                      value={medication ?? ""}
+                                      onChange={(e) =>
+                                        setMedication(e.target.value)
+                                      }
                                       placeholder="Type your notes here ..."
                                       disabled={isPending}
                                       className="h-64"
@@ -363,6 +449,10 @@ const PlanInformationPage = () => {
                                   <FormControl>
                                     <Input
                                       {...field}
+                                      value={nextVisit ?? ""}
+                                      onChange={(e) =>
+                                        setNextVisit(e.target.value)
+                                      }
                                       placeholder="Referral name"
                                       type="date"
                                       disabled={isPending}
@@ -392,21 +482,11 @@ const PlanInformationPage = () => {
               {selectedPlanItems?.includes("8") && (
                 <Card>
                   <CardContent className="p-4">
-                    <Sheet
-                      onOpenChange={(open) => {
-                        if (!open && planId) {
-                          checkOPDPlanExistence(planId);
-                        }
-                      }}
-                    >
+                    <Sheet>
                       <div className="flex items-center gap-6">
                         <SheetTrigger asChild>
                           <Button variant="outline">
-                            {hasOPDPlan ? (
-                              <CheckIcon className="size-6 text-green-500" />
-                            ) : (
-                              <PaperclipIcon className="size-6 text-[#2F80ED]" />
-                            )}
+                            <PaperclipIcon className="size-6 text-[#2F80ED]" />
                           </Button>
                         </SheetTrigger>
                         <SheetContent
@@ -459,6 +539,10 @@ const PlanInformationPage = () => {
                                   <FormControl>
                                     <Textarea
                                       {...field}
+                                      value={specialNotes ?? ""}
+                                      onChange={(e) =>
+                                        setSpecialNotes(e.target.value)
+                                      }
                                       placeholder="Type your notes here ..."
                                       disabled={isPending}
                                       className="h-64"
@@ -492,30 +576,59 @@ const PlanInformationPage = () => {
 
               <div>
                 {!success && (
-                  <Button
-                    type="submit"
-                    size="lg"
-                    className="my-button-blue"
-                    disabled={isPending || selectedPlanItems.length === 0}
-                  >
-                    Save Patient Plan
-                  </Button>
+                  <div className="flex gap-6">
+                    <Button
+                      type="submit"
+                      size="lg"
+                      className="my-button-blue"
+                      disabled={isPending || selectedPlanItems.length === 0}
+                    >
+                      {isUpdated ? "Update" : "Save"} Patient Plan
+                      {isUpdated ? (
+                        <PenLineIcon className="ml-2 size-4" />
+                      ) : (
+                        <CheckIcon className="ml-2 size-4" />
+                      )} 
+                    </Button>
+
+                    <Button
+                      type="button"
+                      onClick={onReset}
+                      size="lg"
+                      className="my-button-red"
+                      disabled={isPending || selectedPlanItems.length === 0}
+                    >
+                      Reset All Plan Items
+                      <Trash2Icon className="ml-2 size-4" />
+                    </Button>
+                  </div>
                 )}
 
                 {success && (
-                  <Button
-                    type="button"
-                    size="lg"
-                    asChild
-                    className="my-button-blue"
-                  >
-                    <Link
-                      href={`/dashboard/add-patient-vitals?patientId=${patientId}`}
+                  <div className="flex gap-6">
+                    <Button
+                      type="submit"
+                      size="lg"
+                      className="my-button-blue"
+                      disabled={isPending || isDeleted}
                     >
-                      Add Patient Vitals
-                      <ArrowRight className="ml-2 size-4" />
-                    </Link>
-                  </Button>
+                      Update Patient Plan
+                      <PenLineIcon className="ml-2 size-4" />
+                    </Button>
+
+                    <Button
+                      type="button"
+                      size="lg"
+                      asChild
+                      disabled={isPending || isDeleted}
+                      className="my-button-blue"
+                    >
+                      <Link href={`/dashboard/home`}>
+                        Done
+                        <CheckIcon className="ml-2 size-4" />
+                      </Link>
+                    </Button>
+                  </div>
                 )}
               </div>
             </div>

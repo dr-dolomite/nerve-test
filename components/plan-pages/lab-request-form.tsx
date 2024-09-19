@@ -33,7 +33,12 @@ import { LaboratoryRequestSchema } from "@/schemas";
 import { saveLabRequestForm } from "@/actions/plan-actions/save-lab-req";
 import { fetchLabRequestPlan } from "@/actions/fetch-actions/fetch-lab";
 
-import { ArrowRightIcon, PrinterIcon } from "lucide-react";
+import {
+  ArrowRightIcon,
+  CheckIcon,
+  PenLineIcon,
+  PrinterIcon,
+} from "lucide-react";
 import LabRequestFormPrintable from "@/components/printables/lab-req-form";
 
 interface LabRequestFormProps {
@@ -171,6 +176,7 @@ const LabRequestForm = ({ patientPlanId, patientId }: LabRequestFormProps) => {
             setFormData(values); // Store form data to pass to the printable component
             form.reset();
             setSuccess(data.success);
+            setUpdate(true);
           }
         })
         .catch(() => {
@@ -335,12 +341,28 @@ const LabRequestForm = ({ patientPlanId, patientId }: LabRequestFormProps) => {
                     {isUpdate
                       ? "Update laboratory Request Form"
                       : "Save Laboratory Request Form"}
-                    <ArrowRightIcon className="size-4 ml-2" />
+                    {isUpdate ? (
+                      <PenLineIcon className="size-4 ml-2" />
+                    ) : (
+                      <CheckIcon className="size-4 ml-2" />
+                    )}
                   </Button>
                 )}
 
-                {success || isUpdate && (
-                  <div className="grid grid-cols-1 grid-flow-row gap-8">
+                {success && (
+                  <div className="grid 2xl:grid-cols-2 grid-cols-1 grid-flow-row gap-8">
+                    <Button
+                      type="submit"
+                      className="my-button-blue"
+                      size="lg"
+                      disabled={isPending}
+                    >
+                      {isUpdate
+                        ? "Update laboratory Request Form"
+                        : "Save Laboratory Request Form"}
+                      <ArrowRightIcon className="size-4 ml-2" />
+                    </Button>
+
                     <div className="max-w-sm flex flex-row items-center gap-x-6">
                       <ReactToPrint
                         trigger={() => (

@@ -159,8 +159,6 @@ const LabRequestFormPrintable = forwardRef<
               <br />
               The Medical City
               <br />
-              Medicus Medical Center
-              <br />
               Metro Iloilo Hospital Medical Center, Inc.
             </div>
           </div>

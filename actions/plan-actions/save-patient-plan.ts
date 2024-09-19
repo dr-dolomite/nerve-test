@@ -13,7 +13,10 @@ export const savePatientPlan = async (
     return { error: "Invalid fields" };
   }
 
-  const { patientId, recordId } = validatedFields.data;
+  const { 
+          patientId, 
+          recordId,
+        } = validatedFields.data;
 
   // Check if the patient exists
   const patient = await db.patientInformation.findUnique({

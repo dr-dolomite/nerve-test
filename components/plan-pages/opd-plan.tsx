@@ -32,7 +32,7 @@ import { saveOPDPlan } from "@/actions/plan-actions/save-opd-plan";
 import { fetchOPDPlan } from "@/actions/fetch-actions/fetch-opd";
 
 import Link from "next/link";
-import { ArrowRightIcon, Check, PrinterIcon } from "lucide-react";
+import { ArrowRightIcon, Check, CheckIcon, PenLineIcon, PrinterIcon } from "lucide-react";
 import OPDPrintableComponent from "@/components/printables/opd-form";
 
 interface OPDPlanPageProps {
@@ -223,7 +223,7 @@ const OPDPlanPage = ({ patientPlanId, patientId }: OPDPlanPageProps) => {
                     disabled={isPending}
                   >
                     {isUpdate ? "Update OPD Plan Record" : "Save OPD Plan Record"}
-                    <ArrowRightIcon className="size-4 ml-2" />
+                    {isUpdate ? <PenLineIcon className="size-4 ml-2" /> : <CheckIcon className="size-4 ml-2" />}
                   </Button>
                 )}
 

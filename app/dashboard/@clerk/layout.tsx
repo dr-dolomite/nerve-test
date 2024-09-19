@@ -40,6 +40,7 @@ import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { signOut } from "next-auth/react";
+import path from "path";
 
 
 const DashboardLayout = ({ children }: { children: ReactNode }) => {
@@ -73,7 +74,7 @@ const DashboardLayout = ({ children }: { children: ReactNode }) => {
                                     pathname == "/dashboard/add-new-user" ||
                                     pathname == "/dashboard/add-patient-history" ||
                                     pathname == "/dashboard/add-patient-vitals" ||
-                                    pathname == "/dashboard/add-followup"
+                                    pathname == "/dashboard/add-plan"
                                     ? "bg-gradient-to-r from-blue-500 to-cyan-500 text-white" : "text-primary"}`}
                             >
                                 <Home className="h-5 w-5" />
