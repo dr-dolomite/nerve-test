@@ -1,5 +1,7 @@
 "use client";
 
+import React, { useState, useEffect } from "react";
+
 import {
   Card,
   CardContent,
@@ -7,16 +9,6 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-
-import {
-  Table,
-  TableBody,
-  TableCaption,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -27,6 +19,9 @@ import {
 } from "lucide-react";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import Link from "next/link";
+import QueuePage from "@/components/view/queue-page";
+import AddPatientToQueueDialog from "@/components/view/queue-dialog";
+import { getOrCreateQueue } from "@/actions/queue/get-or-create";
 
 const ClerkDashboardPage = () => {
   const currentDate = new Date();
@@ -34,39 +29,20 @@ const ClerkDashboardPage = () => {
   const day = currentDate.toLocaleString("default", { weekday: "long" });
   const year = currentDate.getFullYear();
   const dayOfMonth = currentDate.getDate();
+  const [queueId, setQueueId] = useState<string | null>(null);
 
-  const patientNames = [
-    {
-      patientName: "Patient 1",
-      patientStatus: "Current Patient",
-      chiefComplaint: "Chief Complain 1",
-      paymentAmount: "₱ 500.00",
-    },
-    {
-      patientName: "Patient 2",
-      patientStatus: "Next Patient",
-      chiefComplaint: "Chief Complain 2",
-      paymentAmount: "₱ -",
-    },
-    {
-      patientName: "Patient 3",
-      patientStatus: "Pending",
-      chiefComplaint: "Chief Complain 3",
-      paymentAmount: "₱ -",
-    },
-    {
-      patientName: "Patient 4",
-      patientStatus: "Pending",
-      chiefComplaint: "Chief Complain 4",
-      paymentAmount: "₱ -",
-    },
-    {
-      patientName: "Patient 5",
-      patientStatus: "Pending",
-      chiefComplaint: "Chief Complain 5",
-      paymentAmount: "₱ -",
-    },
-  ];
+  useEffect(() => {
+    const fetchQueueId = async () => {
+      const result = await getOrCreateQueue();
+      if (result.success) {
+        setQueueId(result.queueId);
+      } else {
+        console.error(result.error);
+      }
+    };
+
+    fetchQueueId();
+  }, []);
 
   const user = useCurrentUser();
 
@@ -124,53 +100,19 @@ const ClerkDashboardPage = () => {
           <CardDescription>
             Add patients to the queue for the doctor to see.
           </CardDescription>
+          <p>
+            Queue ID: <span className="font-semibold">{queueId}</span>
+          </p>
         </CardHeader>
 
         <CardContent className="grid gap-8">
           <div className="flex">
-            <Button asChild className="my-button-blue">
-              <Link href="/dashboard/add-existing-user">
-                <ListStart className="w-6 h-6 mr-2" /> Add Patient to Queue
-              </Link>
-            </Button>
+            {queueId && <AddPatientToQueueDialog queueId={queueId} />}
           </div>
 
-          <Table>
-            <TableCaption>Current Patient Queue</TableCaption>
-            <TableHeader>
-              <TableRow>
-                <TableHead className="w-[100px]">Patient Name</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Method</TableHead>
-                <TableHead className="text-right">Amount</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {patientNames.map((patientName) => (
-                <TableRow key={patientName.patientName}>
-                  <TableCell className="font-medium">
-                    {patientName.patientName}
-                  </TableCell>
-                  <TableCell>{patientName.patientStatus}</TableCell>
-                  <TableCell>{patientName.paymentAmount}</TableCell>
-                  <TableCell className="text-right">
-                    {patientName.chiefComplaint}
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+          <QueuePage queueId={queueId ?? ""} />
         </CardContent>
       </Card>
-      {/* <div className='flex flex-col justify-center items-center'>
-                <div className="grid grid-cols-2 grid-flow-row gap-x-12">
-                    <Button asChild className="my-button-blue">
-                        <Link href="/dashboard/add-existing-user">
-                            <CirclePlus className="w-6 h-6 mr-2" /> Add Existing Patient
-                        </Link>
-                    </Button>
-                </div>
-            </div> */}
     </div>
   );
 };

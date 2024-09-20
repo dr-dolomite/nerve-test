@@ -2,7 +2,6 @@
 "use server";
 
 import { db } from "@/lib/db";
-import { revalidatePath } from "next/cache";
 
 interface ReorderQueueInput {
   queueId: string;
@@ -10,6 +9,10 @@ interface ReorderQueueInput {
 }
 
 export async function reorderQueue({ queueId, entries }: ReorderQueueInput) {
+
+  if (!queueId || queueId === "") {
+    return { error: "Invalid queue ID" };
+  }
   try {
     // Update all entries in a single transaction
     await db.$transaction(
@@ -22,7 +25,7 @@ export async function reorderQueue({ queueId, entries }: ReorderQueueInput) {
     );
 
     // Revalidate the queue page to reflect changes
-    revalidatePath("/queue");
+    // revalidatePath("/dashboard/home");
 
     return { success: "Reordered successfully." };
   } catch (error) {
