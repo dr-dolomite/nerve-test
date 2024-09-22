@@ -6,16 +6,9 @@ import { useTransition, useState, useEffect, useCallback } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useSearchParams } from "next/navigation";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 
-import {
-  Sheet,
-  SheetContent,
-  SheetTrigger,
-  SheetHeader,
-  SheetTitle,
-  SheetDescription,
-} from "@/components/ui/sheet";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 
 import {
   Card,
@@ -56,50 +49,15 @@ import { PatientPlanSchema } from "@/schemas";
 import { savePatientPlan } from "@/actions/plan-actions/save-patient-plan";
 import { updatePatientPlan } from "@/actions/plan-actions/update-patient-plan";
 import { fetchPlanDetails } from "@/actions/fetch-actions/fetch-plan-details";
-import OPDPlanPage from "@/components/plan-pages/opd-plan";
+import TreatmentPlanForm from "@/components/plan-pages/treatment-form";
 import LabRequestForm from "@/components/plan-pages/lab-request-form";
 import { deletePatientPlan } from "@/actions/plan-actions/delete/delete-patient-plan";
 
-const PlanInformationPage = () => {
-  const planItems = [
-    {
-      id: "1",
-      label: "Laboratory Request",
-    },
-    {
-      id: "2",
-      label: "Treatment",
-    },
-    {
-      id: "3",
-      label: "Follow-up on",
-    },
-    {
-      id: "4",
-      label: "Refer to",
-    },
-    {
-      id: "5",
-      label: "Medical Certificate",
-    },
-    {
-      id: "6",
-      label: "Cardio Pulmonary Clearance",
-    },
-    {
-      id: "7",
-      label: "Neuro Clearance",
-    },
-    {
-      id: "8",
-      label: "OPD",
-    },
-    {
-      id: "9",
-      label: "Notes",
-    },
-  ];
+interface PlanInformationPageProps {
+  existingPlanId: string | null;
+}
 
+const PlanInformationPage = ({ existingPlanId }: PlanInformationPageProps) => {
   // TODO: Queue and add new patient
 
   const searchParams = useSearchParams();
@@ -117,6 +75,8 @@ const PlanInformationPage = () => {
   );
   const [isDeleted, setIsDeleted] = useState(false);
   const [isUpdated, setIsUpdated] = useState(false);
+  const pathName = usePathname();
+  const currentPath = pathName;
 
   const form = useForm<z.infer<typeof PatientPlanSchema>>({
     resolver: zodResolver(PatientPlanSchema),
@@ -241,7 +201,11 @@ const PlanInformationPage = () => {
 
   useEffect(() => {
     const initializePlan = async () => {
-      if (!planId) {
+      if (existingPlanId) {
+        // Use existing plan ID if available
+        setPlanId(existingPlanId);
+        await fetchPlanDetailsAndSetFields(existingPlanId);
+      } else if (!planId) {
         try {
           const data = await savePatientPlan({
             patientId,
@@ -262,15 +226,122 @@ const PlanInformationPage = () => {
         } catch (error) {
           setError("An error occurred.");
         }
-      } else {
-        await fetchPlanDetailsAndSetFields(planId);
       }
     };
-
     initializePlan();
-  }, [patientId, recordId, planId, fetchPlanDetailsAndSetFields]);
+  }, [
+    patientId,
+    recordId,
+    planId,
+    existingPlanId,
+    fetchPlanDetailsAndSetFields,
+  ]);
 
   const selectedPlanItems = form.watch("planItems");
+
+  const planItems = [
+    {
+      id: "1",
+      label: "Laboratory Request",
+      formPage: <LabRequestForm patientId={patientId} patientPlanId={planId} />,
+      description: "Add a laboratory request",
+    },
+    {
+      id: "2",
+      label: "Treatment",
+      formPage: (
+        <TreatmentPlanForm patientId={patientId} patientPlanId={planId ?? ""} />
+      ),
+      description: "Add a treatment form",
+    },
+    {
+      id: "3",
+      label: "Follow-up on",
+      formPage: (
+        <div className="mb-12">
+          <FormField
+            control={form.control}
+            name="nextVisit"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Schedule Next Visit</FormLabel>
+                <FormControl>
+                  <Input
+                    {...field}
+                    value={nextVisit ?? ""}
+                    onChange={(e) => setNextVisit(e.target.value)}
+                    placeholder="Referral name"
+                    type="date"
+                    disabled={isPending}
+                    className="max-w-sm"
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
+      ),
+      description: "Add a follow-up date",
+    },
+    {
+      id: "4",
+      label: "Refer to",
+      formPage: null,
+      description: "Add a referral form",
+    },
+    {
+      id: "5",
+      label: "Medical Certificate",
+      formPage: null,
+      description: "Add a medical certificate",
+    },
+    {
+      id: "6",
+      label: "Cardio Pulmonary Clearance",
+      formPage: null,
+      description: "Add a cardio pulmonary clearance form",
+    },
+    {
+      id: "7",
+      label: "Neuro Clearance",
+      formPage: null,
+      description: "Add a neuro clearance form",
+    },
+    {
+      id: "8",
+      label: "Admission Request",
+      formPage: null,
+      description: "Add an admission request form",
+    },
+    {
+      id: "9",
+      label: "Special Notes",
+      formPage: (
+        <FormField
+          control={form.control}
+          name="specialNotes"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Additional Notes</FormLabel>
+              <FormControl>
+                <Textarea
+                  {...field}
+                  value={specialNotes ?? ""}
+                  onChange={(e) => setSpecialNotes(e.target.value)}
+                  placeholder="Type your notes here ..."
+                  disabled={isPending}
+                  className="h-64"
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+      ),
+      description: "Add special notes",
+    },
+  ];
 
   return (
     <Card className="p-4">
@@ -333,240 +404,37 @@ const PlanInformationPage = () => {
             />
 
             <div className="grid 2xl:grid-cols-3 grid-cols-1 grid-flow-row gap-3 2xl:mt-12 mt-8">
-              {selectedPlanItems?.includes("1") && (
-                <Card>
-                  <CardContent className="p-4">
-                    <Sheet>
-                      <div className="flex items-center gap-6">
-                        <SheetTrigger asChild>
-                          <Button variant="outline">
-                            <PaperclipIcon className="size-6 text-[#2F80ED]" />
-                          </Button>
-                        </SheetTrigger>
-                        <SheetContent
-                          side="bottom"
-                          className="max-h-[90%] overflow-y-auto"
-                        >
-                          <LabRequestForm
-                            patientId={patientId}
-                            patientPlanId={planId}
-                          />
-                        </SheetContent>
-                        <div className="grid gap-1 xs:hidden">
-                          <p className="2xl:text-sm text-xs font-medium leading-none">
-                            Laboratory Request Form
-                          </p>
-                          <p className="2xl:text-sm text-xs text-muted-foreground">
-                            Fill out the laboratory request form
-                          </p>
-                        </div>
-                      </div>
-                    </Sheet>
-                  </CardContent>
-                </Card>
-              )}
-
-              {selectedPlanItems?.includes("2") && (
-                <Card>
-                  <CardContent className="p-4">
-                    <Sheet>
-                      <div className="flex items-center gap-6">
-                        <SheetTrigger asChild>
-                          <Button variant="outline">
-                            <PaperclipIcon className="size-6 text-[#2F80ED]" />
-                          </Button>
-                        </SheetTrigger>
-                        <SheetContent side="right">
-                          <SheetHeader>
-                            <SheetTitle>Treatment</SheetTitle>
-                            <SheetDescription>
-                              Add a medication
-                            </SheetDescription>
-                          </SheetHeader>
-                          <div className="mt-8">
-                            <FormField
-                              control={form.control}
-                              name="medication"
-                              render={({ field }) => (
-                                <FormItem>
-                                  <FormLabel>Medication</FormLabel>
-                                  <FormControl>
-                                    <Textarea
-                                      {...field}
-                                      value={medication ?? ""}
-                                      onChange={(e) =>
-                                        setMedication(e.target.value)
-                                      }
-                                      placeholder="Type your notes here ..."
-                                      disabled={isPending}
-                                      className="h-64"
-                                    />
-                                  </FormControl>
-                                  <FormMessage />
-                                </FormItem>
-                              )}
-                            />
+              {planItems
+                .filter((item) => selectedPlanItems.includes(item.id))
+                .map((item) => (
+                  <Card key={item.id}>
+                    <CardContent className="p-4">
+                      <Sheet>
+                        <div className="flex items-center gap-6">
+                          <SheetTrigger asChild>
+                            <Button variant="outline">
+                              <PaperclipIcon className="size-6 text-[#2F80ED]" />
+                            </Button>
+                          </SheetTrigger>
+                          <SheetContent
+                            side="bottom"
+                            className="max-h-[90%] overflow-y-auto"
+                          >
+                            {item.formPage}
+                          </SheetContent>
+                          <div className="grid gap-1 xs:hidden">
+                            <p className="2xl:text-sm text-xs font-medium leading-none">
+                              {item.label}
+                            </p>
+                            <p className="2xl:text-sm text-xs text-muted-foreground">
+                              {item.description}
+                            </p>
                           </div>
-                        </SheetContent>
-                        <div className="grid gap-1 xs:hidden">
-                          <p className="2xl:text-sm text-xs font-medium leading-none">
-                            Additional Medication
-                          </p>
-                          <p className="2xl:text-sm text-xs text-muted-foreground">
-                            Add a medication
-                          </p>
                         </div>
-                      </div>
-                    </Sheet>
-                  </CardContent>
-                </Card>
-              )}
-
-              {selectedPlanItems?.includes("3") && (
-                <Card>
-                  <CardContent className="p-4">
-                    <Sheet>
-                      <div className="flex items-center gap-6">
-                        <SheetTrigger asChild>
-                          <Button variant="outline">
-                            <PaperclipIcon className="size-6 text-[#2F80ED]" />
-                          </Button>
-                        </SheetTrigger>
-                        <SheetContent side="right">
-                          <SheetHeader>
-                            <SheetTitle>Follow Up on</SheetTitle>
-                            <SheetDescription>
-                              Add a follow up date
-                            </SheetDescription>
-                          </SheetHeader>
-                          <div className="mt-8">
-                            <FormField
-                              control={form.control}
-                              name="nextVisit"
-                              render={({ field }) => (
-                                <FormItem>
-                                  <FormLabel>Schedule Next Visit</FormLabel>
-                                  <FormControl>
-                                    <Input
-                                      {...field}
-                                      value={nextVisit ?? ""}
-                                      onChange={(e) =>
-                                        setNextVisit(e.target.value)
-                                      }
-                                      placeholder="Referral name"
-                                      type="date"
-                                      disabled={isPending}
-                                      className="max-w-sm"
-                                    />
-                                  </FormControl>
-                                  <FormMessage />
-                                </FormItem>
-                              )}
-                            />
-                          </div>
-                        </SheetContent>
-                        <div className="grid gap-1 xs:hidden">
-                          <p className="2xl:text-sm text-xs font-medium leading-none">
-                            Follow-up On
-                          </p>
-                          <p className="2xl:text-sm text-xs text-muted-foreground">
-                            Add a follow up date
-                          </p>
-                        </div>
-                      </div>
-                    </Sheet>
-                  </CardContent>
-                </Card>
-              )}
-
-              {selectedPlanItems?.includes("8") && (
-                <Card>
-                  <CardContent className="p-4">
-                    <Sheet>
-                      <div className="flex items-center gap-6">
-                        <SheetTrigger asChild>
-                          <Button variant="outline">
-                            <PaperclipIcon className="size-6 text-[#2F80ED]" />
-                          </Button>
-                        </SheetTrigger>
-                        <SheetContent
-                          side="bottom"
-                          className="max-h-[90%] overflow-y-auto"
-                        >
-                          <OPDPlanPage
-                            patientId={patientId}
-                            patientPlanId={planId}
-                          />
-                        </SheetContent>
-                        <div className="grid gap-1 xs:hidden">
-                          <p className="2xl:text-sm text-xs font-medium leading-none">
-                            OPD
-                          </p>
-                          <p className="2xl:text-sm text-xs text-muted-foreground">
-                            Add an OPD plan
-                          </p>
-                        </div>
-                      </div>
-                    </Sheet>
-                  </CardContent>
-                </Card>
-              )}
-
-              {selectedPlanItems?.includes("9") && (
-                <Card>
-                  <CardContent className="p-4">
-                    <Sheet>
-                      <div className="flex items-center gap-6">
-                        <SheetTrigger asChild>
-                          <Button variant="outline">
-                            <PaperclipIcon className="size-6 text-[#2F80ED]" />
-                          </Button>
-                        </SheetTrigger>
-                        <SheetContent side="right">
-                          <SheetHeader>
-                            <SheetTitle>Additional Notes</SheetTitle>
-                            <SheetDescription>
-                              Add an additional note
-                            </SheetDescription>
-                          </SheetHeader>
-                          <div className="mt-8">
-                            <FormField
-                              control={form.control}
-                              name="specialNotes"
-                              render={({ field }) => (
-                                <FormItem>
-                                  <FormLabel>Additional Notes</FormLabel>
-                                  <FormControl>
-                                    <Textarea
-                                      {...field}
-                                      value={specialNotes ?? ""}
-                                      onChange={(e) =>
-                                        setSpecialNotes(e.target.value)
-                                      }
-                                      placeholder="Type your notes here ..."
-                                      disabled={isPending}
-                                      className="h-64"
-                                    />
-                                  </FormControl>
-                                  <FormMessage />
-                                </FormItem>
-                              )}
-                            />
-                          </div>
-                        </SheetContent>
-                        <div className="grid gap-1 xs:hidden">
-                          <p className="2xl:text-sm text-xs font-medium leading-none">
-                            Additional Notes
-                          </p>
-                          <p className="2xl:text-sm text-xs text-muted-foreground">
-                            Add an additional note
-                          </p>
-                        </div>
-                      </div>
-                    </Sheet>
-                  </CardContent>
-                </Card>
-              )}
+                      </Sheet>
+                    </CardContent>
+                  </Card>
+                ))}
             </div>
             <div className="flex flex-col col-span-3 mt-4 gap-y-4">
               <div className="text-center">
@@ -588,7 +456,7 @@ const PlanInformationPage = () => {
                         <PenLineIcon className="ml-2 size-4" />
                       ) : (
                         <CheckIcon className="ml-2 size-4" />
-                      )} 
+                      )}
                     </Button>
 
                     <Button
@@ -616,18 +484,22 @@ const PlanInformationPage = () => {
                       <PenLineIcon className="ml-2 size-4" />
                     </Button>
 
-                    <Button
-                      type="button"
-                      size="lg"
-                      asChild
-                      disabled={isPending || isDeleted}
-                      className="my-button-blue"
-                    >
-                      <Link href={`/dashboard/home`}>
-                        Done
-                        <CheckIcon className="ml-2 size-4" />
-                      </Link>
-                    </Button>
+                    {!currentPath.startsWith(
+                      "/dashboard/records/view-patient-record"
+                    ) && (
+                      <Button
+                        type="button"
+                        size="lg"
+                        asChild
+                        disabled={isPending || isDeleted}
+                        className="my-button-blue"
+                      >
+                        <Link href={`/dashboard/home`}>
+                          Done
+                          <CheckIcon className="ml-2 size-4" />
+                        </Link>
+                      </Button>
+                    )}
                   </div>
                 )}
               </div>

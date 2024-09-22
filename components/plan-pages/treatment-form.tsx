@@ -32,20 +32,29 @@ import { saveOPDPlan } from "@/actions/plan-actions/save-opd-plan";
 import { fetchOPDPlan } from "@/actions/fetch-actions/fetch-opd";
 
 import Link from "next/link";
-import { ArrowRightIcon, Check, CheckIcon, PenLineIcon, PrinterIcon } from "lucide-react";
+import {
+  ArrowRightIcon,
+  Check,
+  CheckIcon,
+  PenLineIcon,
+  PrinterIcon,
+} from "lucide-react";
 import OPDPrintableComponent from "@/components/printables/opd-form";
 
-interface OPDPlanPageProps {
-  patientPlanId: string | null;
+interface TreatmentPlanFormProps {
+  patientPlanId: string;
   patientId: string;
 }
 
-const OPDPlanPage = ({ patientPlanId, patientId }: OPDPlanPageProps) => {
+const TreatmentPlanForm = ({
+  patientPlanId,
+  patientId,
+}: TreatmentPlanFormProps) => {
   const [error, setError] = useState<string | undefined>("");
   const [success, setSuccess] = useState<string | undefined>("");
-  const [isUpdate, setUpdate] = useState(false)
+  const [isUpdate, setUpdate] = useState(false);
   const [isPending, startTransition] = useTransition();
-  const patientPlanIdValue = patientPlanId ?? "";
+  const patientPlanIdValue = patientPlanId ?? undefined;
 
   const [formData, setFormData] = useState<z.infer<
     typeof OPDPlanSchema
@@ -63,7 +72,7 @@ const OPDPlanPage = ({ patientPlanId, patientId }: OPDPlanPageProps) => {
   });
 
   useEffect(() => {
-    if (patientPlanId) {
+    if (patientPlanId && patientPlanId !== "") {
       startTransition(() => {
         fetchOPDPlan(patientPlanId)
           .then((data) => {
@@ -109,12 +118,39 @@ const OPDPlanPage = ({ patientPlanId, patientId }: OPDPlanPageProps) => {
 
   const printableRef = useRef(null);
 
+  if (!patientId) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle>Treatment Form</CardTitle>
+          <CardDescription>
+            No plan record found for this patient
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <Button className="my-button-blue max-w-xs " asChild>
+            <Link
+              href={`/dashboard/add-patient-vitals?type=history&patientId=${patientId}`}
+            >
+              <ArrowRightIcon className="size-4 mr-2" />
+              Add Patient History Record
+            </Link>
+          </Button>
+        </CardContent>
+      </Card>
+    );
+  }
+
   return (
     <Card className="p-4 mt-6">
       <CardHeader>
-        <CardTitle>Patient OPD Plan</CardTitle>
+        <CardTitle>
+          Treatment Form
+        </CardTitle>
         <CardDescription>
-        {patientPlanId ? "Update the existing OPD plan." : "Create a new OPD plan."}
+          {patientPlanId
+            ? "Update treatment form"
+            : "Create treatment form"}
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -193,7 +229,7 @@ const OPDPlanPage = ({ patientPlanId, patientId }: OPDPlanPageProps) => {
                 name="OPDNotes"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Special Notes for OPD</FormLabel>
+                    <FormLabel>Special Notes</FormLabel>
                     <FormControl>
                       <Textarea
                         {...field}
@@ -215,17 +251,19 @@ const OPDPlanPage = ({ patientPlanId, patientId }: OPDPlanPageProps) => {
               </div>
 
               <div className="flex flex-row gap-x-12 mt-4">
-                {!success && (
-                  <Button
-                    type="submit"
-                    className="my-button-blue"
-                    size="lg"
-                    disabled={isPending}
-                  >
-                    {isUpdate ? "Update OPD Plan Record" : "Save OPD Plan Record"}
-                    {isUpdate ? <PenLineIcon className="size-4 ml-2" /> : <CheckIcon className="size-4 ml-2" />}
-                  </Button>
-                )}
+                <Button
+                  type="submit"
+                  className="my-button-blue"
+                  size="lg"
+                  disabled={isPending}
+                >
+                  {isUpdate ? "Update Treatment Record" : "Save Treatment Record"}
+                  {isUpdate ? (
+                    <PenLineIcon className="size-4 ml-2" />
+                  ) : (
+                    <CheckIcon className="size-4 ml-2" />
+                  )}
+                </Button>
 
                 {success && (
                   <div className="grid grid-cols-1 grid-flow-row gap-8">
@@ -237,7 +275,7 @@ const OPDPlanPage = ({ patientPlanId, patientId }: OPDPlanPageProps) => {
                             className="my-button-blue"
                             size="lg"
                           >
-                            Print The Plan
+                            Print The Admission Request Plan
                             <PrinterIcon className="size-4 ml-2" />
                           </Button>
                         )}
@@ -269,4 +307,4 @@ const OPDPlanPage = ({ patientPlanId, patientId }: OPDPlanPageProps) => {
   );
 };
 
-export default OPDPlanPage;
+export default TreatmentPlanForm;

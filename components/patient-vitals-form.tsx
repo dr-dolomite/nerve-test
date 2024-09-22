@@ -30,7 +30,7 @@ import { Input } from "@/components/ui/input";
 import { FormError } from "@/components/form-error";
 import { FormSuccess } from "@/components/form-success";
 import { savePatientVitals } from "@/actions/save-patient-vitals";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, HomeIcon } from "lucide-react";
 
 const PatientVitalsForm = () => {
   const [error, setError] = useState<string | undefined>("");
@@ -76,6 +76,39 @@ const PatientVitalsForm = () => {
         });
     });
   };
+
+  if (!patientId) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle>Patient Vitals</CardTitle>
+          <CardDescription>
+            Fill up the form below to save patient vitals.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="flex flex-col col-span-3 mt-4 gap-y-4">
+            <div className="text-center">
+              <FormError message="Patient ID is required." />
+            </div>
+            <div>
+              <Button
+                type="button"
+                size="lg"
+                className="my-button-blue"
+                asChild
+              >
+                <Link href="/dashboard/home">
+                  <HomeIcon className="size-4 mr-2" />
+                  Go Back Home
+                </Link>
+              </Button>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
     <Card>
@@ -202,6 +235,7 @@ const PatientVitalsForm = () => {
                     {type === "follow-up"
                       ? "Save Follow-up Vitals"
                       : "Save Patient History Vitals"}
+                      <ArrowRight className="size-4 ml-2" />
                   </Button>
                 )}
 

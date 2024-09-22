@@ -68,7 +68,6 @@ const PatientHistoryForm = () => {
   const patientId = searchParams.get("patientId");
   const vitalSignsId = searchParams.get("vitalSignsId");
 
-
   const form = useForm<z.infer<typeof PatientHistorySchema>>({
     resolver: zodResolver(PatientHistorySchema),
     defaultValues: {

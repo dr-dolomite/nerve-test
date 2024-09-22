@@ -156,3 +156,32 @@ export async function searchPatientByName(name: string) {
         return [];
     }
 }
+
+export async function getPatientPlanByRecordId (recordId: string) {
+
+    if (!recordId) {
+        return null;
+    }
+
+    // Check if recordId corresponds to PatientPlan on PatientHistory table or PatientFollowUps table
+    const existingPatientPlan = await db.patientPlan.findFirst({
+        where: {
+          OR: [{ followUpId: recordId }, { historyId: recordId }],
+        },
+      });
+    
+    // Fetch the plan if it exists
+    if (existingPatientPlan) {
+        return existingPatientPlan;
+    }
+}
+
+export async function getPatientPlanById (id: string) {
+    const patientPlan = await db.patientPlan.findUnique({
+        where: {
+            id
+        }
+    });
+
+    return patientPlan;
+}

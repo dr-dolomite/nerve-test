@@ -30,12 +30,15 @@ import {
 
 import { Separator } from '@/components/ui/separator';
 import { Badge } from "@/components/ui/badge"
-import { BookText, EditIcon, IterationCw, UserCircle2, UserIcon } from 'lucide-react';
+import { BookText, EditIcon, IterationCw, PlusCircleIcon, UserCircle2, UserIcon } from 'lucide-react';
 import { getPatientById } from '@/data/get-patient-info';
 import PatientHistoryViewPage from '@/components/patient-history-view';
 import { FaMapMarkerAlt } from 'react-icons/fa';
 import FollowUpListPage from '@/components/follow-up-list';
 import EditPatientInformationPage from '@/components/edit/edit-patient-information';
+
+import { Button } from '@/components/ui/button';
+import Link from 'next/link';
 
 const ViewPatientRecordPage = async ({ params }: { params: { id: string } }) => {
 
@@ -43,11 +46,24 @@ const ViewPatientRecordPage = async ({ params }: { params: { id: string } }) => 
 
     if (!patient) {
         return (
-            <div>
-                <h1>
+            <Card>
+                <CardHeader>
+                    <CardTitle>
+                        Missing Patient Record
+                    </CardTitle>
+                    <CardDescription>
                     Patient Not Found
-                </h1>
-            </div>
+                    </CardDescription>
+                </CardHeader>
+                <CardContent>
+                    <Button className='my-button-blue max-w-xs' asChild>
+                        <Link href='/dashboard/add-existing-patient'>
+                        <PlusCircleIcon className='size-4 mr-2' />
+                            Add Existing Patient Record
+                        </Link>
+                    </Button>
+                </CardContent>
+            </Card>
         )
     }
 
@@ -181,7 +197,7 @@ const ViewPatientRecordPage = async ({ params }: { params: { id: string } }) => 
                                                 Birthday:
                                             </div>
                                             <div className='col-span-2 capitalize'>
-                                                {patient.birthday.toDateString()}
+                                                {patient.birthday?.toDateString()}
                                             </div>
                                             <div className='col-span-1 font-semibold'>
                                                 Age:

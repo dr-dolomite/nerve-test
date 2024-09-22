@@ -3,8 +3,9 @@
 import * as z from "zod";
 import { db } from "@/lib/db";
 import { PatientPlanSchema } from "@/schemas";
+import { getPatientPlanById } from "@/data/get-patient-info";
 
-export const updatePatientPlan = async (
+export const updatePatientPlanNotesAndDate = async (
   values: z.infer<typeof PatientPlanSchema>
 ) => {
   const validatedFields = PatientPlanSchema.safeParse(values);
@@ -13,8 +14,7 @@ export const updatePatientPlan = async (
     return { error: "Invalid fields" };
   }
 
-  const { planId, nextVisit, specialNotes, planItems } =
-    validatedFields.data;
+  const { nextVisit, specialNotes, planId } = validatedFields.data;
 
   const nextVisitDate = nextVisit ? new Date(nextVisit) : null;
 
@@ -24,20 +24,28 @@ export const updatePatientPlan = async (
   }
 
   if (!planId) {
-    return { error: "Plan record does not exist." };
+    return { error: "Plan id is required." };
   }
 
-  // Update the record
+  const existingPatientPlan = await getPatientPlanById(planId);
+
+  if (!existingPatientPlan) {
+    return { error: "Patient plan record not found." };
+  }
+
   await db.patientPlan.update({
     where: {
       id: planId,
     },
     data: {
-      nextVisit: nextVisitDate,
-      followUpNotes: specialNotes,
-      planItems,
+      ...(nextVisit && {
+        nextVisit: nextVisitDate,
+      }),
+      ...(specialNotes && {
+        followUpNotes: specialNotes,
+      }),
     },
   });
 
-  return { success: "Plan updated. Please proceed." };
+  return { success: "Plan record updated successfully." };
 };

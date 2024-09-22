@@ -80,7 +80,7 @@ const ClerkDashboardPage = () => {
         <CardContent>
           <div className="flex 2xl:gap-12 gap-8">
             <Button asChild className="my-button-blue">
-              <Link href="/dashboard/add-existing-user">
+              <Link href="/dashboard/add-existing-patient">
                 <FolderPenIcon className="w-6 h-6 mr-2" /> Add Existing Patient
               </Link>
             </Button>
@@ -100,9 +100,9 @@ const ClerkDashboardPage = () => {
           <CardDescription>
             Add patients to the queue for the doctor to see.
           </CardDescription>
-          <p>
+          {/* <p>
             Queue ID: <span className="font-semibold">{queueId}</span>
-          </p>
+          </p> */}
         </CardHeader>
 
         <CardContent className="grid gap-8">

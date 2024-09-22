@@ -1,9 +1,12 @@
 import PlanInformationPage from "@/components/plan-pages/plan-page"
 
+interface PatientPlanFormProps {
+  existingPlanId: string
+}
 
-const PatientPlanForm = () => {
+const PatientPlanForm = ({ existingPlanId } : PatientPlanFormProps) => {
   return (
-    <PlanInformationPage/>
+    <PlanInformationPage existingPlanId={existingPlanId}/>
   )
 }
 

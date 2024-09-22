@@ -37,7 +37,7 @@ const FollowUpListPage = async ({ patientId }: FollowUpListProps) => {
             className="my-button-blue max-w-xs "
             asChild
             >
-                <Link href={`/dashboard/add-patient-vitals?patientId=${patientId}&type=followUp`}>
+                <Link href={`/dashboard/add-patient-vitals?type=follow-up&patientId=${patientId}`}>
                 <PlusCircle className="size-4 mr-2"/>
                     Add Follow Up Record
                 </Link>

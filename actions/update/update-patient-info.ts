@@ -27,13 +27,12 @@ export const updatePatientInfo = async (values: z.infer<typeof PatientInformatio
         email,
         id,
     } = validatedFields.data;
+    
+    const parsedBirthday = birthday ? new Date(birthday) : "";
 
-    const parsedBirthday = new Date(birthday);
-
-    if (isNaN(parsedBirthday.getTime())) {
-        return { error: "Invalid date format." };
-    }
-
+    // if (isNaN(parsedBirthday.getTime())) {
+    //     return { error: "Invalid date format." };
+    // }
     if (!id) {
         return { error: "Patient ID is required." };
     }
