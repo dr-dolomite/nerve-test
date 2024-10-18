@@ -42,7 +42,11 @@ import { savePatientInfo } from "@/actions/save-patient-info";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 
-const PatientInformationForm = () => {
+interface PatientInformationFormProps {
+  isNewPatient?: boolean;
+}
+
+const PatientInformationForm = ({ isNewPatient } : PatientInformationFormProps) => {
   const [error, setError] = useState<string | undefined>("");
   const [success, setSuccess] = useState<string | undefined>("");
   const [isPending, startTransition] = useTransition();
@@ -529,7 +533,7 @@ const PatientInformationForm = () => {
                     className="my-button-blue"
                   >
                     <Link
-                      href={`/dashboard/add-patient-vitals?type=history&patientId=${patientId}`}
+                      href={`/dashboard/add-patient-vitals?type=history&patientId=${patientId}&new=${isNewPatient}`}
                     >
                       Add Patient Vitals for History
                       <ArrowRight className="ml-2 size-4" />

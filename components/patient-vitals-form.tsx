@@ -1,9 +1,12 @@
 "use client";
 import * as z from "zod";
-import { useTransition, useState } from "react";
+import { useTransition, useState, useEffect, useCallback } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useSearchParams } from "next/navigation";
+
+import { getOrCreateQueue } from "@/actions/queue/get-or-create";
+import { addToQueue } from "@/actions/queue/add-to-queue";
 
 import {
   Card,
@@ -36,10 +39,12 @@ const PatientVitalsForm = () => {
   const [error, setError] = useState<string | undefined>("");
   const [success, setSuccess] = useState<string | undefined>("");
   const [vitalSignsid, setVitalSignsid] = useState<string>("");
+  const [queueId, setQueueId] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
   const searchParams = useSearchParams();
   const patientId = searchParams.get("patientId");
   const type = searchParams.get("type");
+  const isNewPatient = searchParams.get("new");
 
   const form = useForm<z.infer<typeof PatientVitalsSchema>>({
     resolver: zodResolver(PatientVitalsSchema),
@@ -52,6 +57,43 @@ const PatientVitalsForm = () => {
       oxygen: 0,
     },
   });
+
+  useEffect(() => {
+    const fetchQueueId = async () => {
+      const result = await getOrCreateQueue();
+      if (result.success) {
+        setQueueId(result.queueId);
+      } else {
+        console.error(result.error);
+      }
+    };
+
+    fetchQueueId();
+  }, []);
+
+  const handleAddToQueue = () => {
+    setError("");
+    setSuccess("");
+
+    startTransition(() => {
+      if (patientId && queueId) {
+        addToQueue({
+          queueId,
+          patientId: patientId,
+        })
+          .then((result) => {
+            if (result.success) {
+              setSuccess("Patient added to queue");
+            } else {
+              setError("Patient already in queue.");
+            }
+          })
+          .catch(() => {
+            setError("An error occurred.");
+          });
+      }
+    });
+  };
 
   const onSubmit = (values: z.infer<typeof PatientVitalsSchema>) => {
     setError("");
@@ -85,6 +127,7 @@ const PatientVitalsForm = () => {
           <CardDescription>
             Fill up the form below to save patient vitals.
           </CardDescription>
+          Is new patient: {isNewPatient}
         </CardHeader>
         <CardContent>
           <div className="flex flex-col col-span-3 mt-4 gap-y-4">
@@ -235,11 +278,27 @@ const PatientVitalsForm = () => {
                     {type === "follow-up"
                       ? "Save Follow-up Vitals"
                       : "Save Patient History Vitals"}
-                      <ArrowRight className="size-4 ml-2" />
+                    <ArrowRight className="size-4 ml-2" />
                   </Button>
                 )}
 
-                {success && patientId && vitalSignsid && (
+                {success && isNewPatient && (
+                  // Add patient to queue
+                  <Button
+                    type="button"
+                    size="lg"
+                    // asChild
+                    className="my-button-blue"
+                    onClick={handleAddToQueue}
+                  >
+                    {/* <Link href="/dashboard/add-new-patient"> */}
+                    Add New Patient to Queue{" "}
+                    <ArrowRight className="size-4 ml-2" />
+                    {/* </Link> */}
+                  </Button>
+                )}
+
+                {success && patientId && !isNewPatient && vitalSignsid && (
                   <Button
                     type="button"
                     size="lg"

@@ -243,7 +243,6 @@ const ViewPatientRecordPage = async ({ params }: { params: { id: string } }) => 
                                             </div>
                                         </div>
                                     </div>
-
                                 </TabsContent>
                                 <TabsContent value="history">
                                     <PatientHistoryViewPage patientId={params.id} />

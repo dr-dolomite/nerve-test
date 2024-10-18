@@ -2,11 +2,11 @@
 
 import * as z from "zod";
 import { useTransition, useState, useEffect, useCallback } from "react";
-
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useSearchParams } from "next/navigation";
-import { useRouter, usePathname } from "next/navigation";
+import { usePathname } from "next/navigation";
+import { useToast } from "@/components/ui/use-toast"
 
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 
@@ -55,15 +55,22 @@ import { deletePatientPlan } from "@/actions/plan-actions/delete/delete-patient-
 
 interface PlanInformationPageProps {
   existingPlanId: string | null;
+  existingRecordId: string | null;
+  existingPatientId: string | undefined;
 }
 
-const PlanInformationPage = ({ existingPlanId }: PlanInformationPageProps) => {
+const PlanInformationPage = ({
+  existingPlanId,
+  existingRecordId,
+  existingPatientId,
+}: PlanInformationPageProps) => {
   // TODO: Queue and add new patient
 
   const searchParams = useSearchParams();
-  const router = useRouter();
-  const patientId = searchParams.get("patientId") ?? "";
-  const recordId = searchParams.get("recordId") ?? "";
+  const patientId =
+    existingPatientId ?? searchParams.get("patientId") ?? undefined;
+  const recordId =
+    existingRecordId ?? searchParams.get("recordId") ?? undefined;
   const [error, setError] = useState<string | undefined>("");
   const [success, setSuccess] = useState<string | undefined>("");
   const [isPending, startTransition] = useTransition();
@@ -77,6 +84,7 @@ const PlanInformationPage = ({ existingPlanId }: PlanInformationPageProps) => {
   const [isUpdated, setIsUpdated] = useState(false);
   const pathName = usePathname();
   const currentPath = pathName;
+  const { toast } = useToast();
 
   const form = useForm<z.infer<typeof PatientPlanSchema>>({
     resolver: zodResolver(PatientPlanSchema),
@@ -119,7 +127,7 @@ const PlanInformationPage = ({ existingPlanId }: PlanInformationPageProps) => {
     }
 
     startTransition(() => {
-      updatePatientPlan(updatedValues)
+      updatePatientPlan(updatedValues) // Try to make a real time update on the fields
         .then((data) => {
           if (data?.error) {
             setError(data.error);
@@ -127,6 +135,10 @@ const PlanInformationPage = ({ existingPlanId }: PlanInformationPageProps) => {
 
           if (data?.success) {
             setSuccess(data.success);
+            toast({
+              title: "Updated successfuly!",
+              description: "Please refresh the page to see the changes.",
+          })
           }
         })
         .catch(() => {
@@ -136,34 +148,35 @@ const PlanInformationPage = ({ existingPlanId }: PlanInformationPageProps) => {
   };
 
   const onReset = () => {
-    deletePatientPlan(planId ?? "", recordId)
-      .then((data) => {
-        if (data?.error) {
-          setError(data.error);
-        } else if (data?.success) {
-          setSuccess(data.success);
-          setIsDeleted(true);
-          // Reset state variables
-          setMedication(undefined);
-          setNextVisit(undefined);
-          setSpecialNotes(undefined);
-          setPlanId(null);
-          setIsUpdated(false);
-          form.reset({
-            planId: "",
-            patientId: patientId ?? "",
-            recordId: recordId ?? "",
-            nextVisit: "",
-            specialNotes: "",
-            medication: "",
-            planItems: [],
-          });
-          router.refresh();
-        }
-      })
-      .catch(() => {
-        setError("An error occurred.");
-      });
+    if (planId && planId !== "" && recordId) {
+      deletePatientPlan(planId ?? "", recordId)
+        .then((data) => {
+          if (data?.error) {
+            setError(data.error);
+          } else if (data?.success) {
+            setSuccess(data.success);
+            setIsDeleted(true);
+            // Reset state variables
+            setMedication(undefined);
+            setNextVisit(undefined);
+            setSpecialNotes(undefined);
+            setPlanId(null);
+            setIsUpdated(false);
+            form.reset({
+              planId: "",
+              patientId: patientId ?? "",
+              recordId: recordId ?? "",
+              nextVisit: "",
+              specialNotes: "",
+              medication: "",
+              planItems: [],
+            });
+          }
+        })
+        .catch(() => {
+          setError("An error occurred.");
+        });
+    }
   };
 
   const fetchPlanDetailsAndSetFields = useCallback(
@@ -200,16 +213,19 @@ const PlanInformationPage = ({ existingPlanId }: PlanInformationPageProps) => {
   );
 
   useEffect(() => {
+    setError("");
+    setSuccess("");
+
     const initializePlan = async () => {
-      if (existingPlanId) {
+      if (existingPlanId && recordId && patientId) {
         // Use existing plan ID if available
         setPlanId(existingPlanId);
         await fetchPlanDetailsAndSetFields(existingPlanId);
-      } else if (!planId) {
+      } else if (!planId && recordId && patientId) {
         try {
           const data = await savePatientPlan({
             patientId,
-            recordId,
+            recordId: recordId ?? "",
             planId: "",
             planItems: [],
             nextVisit: "",
@@ -243,14 +259,19 @@ const PlanInformationPage = ({ existingPlanId }: PlanInformationPageProps) => {
     {
       id: "1",
       label: "Laboratory Request",
-      formPage: <LabRequestForm patientId={patientId} patientPlanId={planId} />,
+      formPage: (
+        <LabRequestForm patientId={patientId ?? ""} patientPlanId={planId} />
+      ),
       description: "Add a laboratory request",
     },
     {
       id: "2",
       label: "Treatment",
       formPage: (
-        <TreatmentPlanForm patientId={patientId} patientPlanId={planId ?? ""} />
+        <TreatmentPlanForm
+          patientId={patientId ?? ""}
+          patientPlanId={planId ?? ""}
+        />
       ),
       description: "Add a treatment form",
     },

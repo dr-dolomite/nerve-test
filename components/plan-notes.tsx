@@ -5,12 +5,12 @@ interface PlanNotesProps {
     recordId: string;
 }
 
-import { getFollowUpPlanById } from "@/data/get-patient-info";
+import { getPatientFollowUpById } from "@/data/get-patient-info";
 
 const PlanDetailsPage = async ({ plan, recordId }: PlanNotesProps) => {
 
     if (plan === "follow-up") {
-        const followUpPlanRecord = await getFollowUpPlanById(recordId);
+        const followUpPlanRecord = await getPatientFollowUpById(recordId);
         console.log(plan);
         console.log(recordId);
         console.log(followUpPlanRecord);
@@ -29,7 +29,7 @@ const PlanDetailsPage = async ({ plan, recordId }: PlanNotesProps) => {
                     </p>
                 </div>
 
-                <div className="2xl:col-span-2 col-span-1 flex flex-col gap-2">
+                {/* <div className="2xl:col-span-2 col-span-1 flex flex-col gap-2">
                     <div className="flex shrink-0">
                         <Label className="font-semibold bg-[#2F80ED] p-3 text-white">
                             Plan Scheduled Visit
@@ -39,7 +39,7 @@ const PlanDetailsPage = async ({ plan, recordId }: PlanNotesProps) => {
                     <p className="text-wrap">
                         {followUpPlanRecord?.nextVisit?.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
                     </p>
-                </div>
+                </div> */}
 
                 <div className="col-span-2 flex flex-col gap-2">
                     <div className="flex shrink-0">
@@ -48,9 +48,9 @@ const PlanDetailsPage = async ({ plan, recordId }: PlanNotesProps) => {
                         </Label>
                     </div>
 
-                    <p className="text-wrap">
+                    {/* <p className="text-wrap">
                         {followUpPlanRecord?.followUpNotes}
-                    </p>
+                    </p> */}
                 </div>
             </div>
 
