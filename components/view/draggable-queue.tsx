@@ -86,9 +86,9 @@ const DraggableQueue = ({ queue, entries }: DraggableQueueProps) => {
                               {entry.patient.name}
                             </h3>
 
-                            <p className="text-sm text-gray">
+                            <div className="text-sm text-gray">
                               <Badge>{entry.status}</Badge>
-                            </p>
+                            </div>
                           </div>
                           <p className="text-sm text-gray">
                             Queue Number {entry.position}

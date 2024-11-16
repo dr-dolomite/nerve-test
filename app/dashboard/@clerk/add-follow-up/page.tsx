@@ -5,9 +5,6 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useSearchParams } from "next/navigation";
 
-import { getOrCreateQueue } from "@/actions/queue/get-or-create";
-import { addToQueue } from "@/actions/queue/add-to-queue";
-
 import {
   Card,
   CardContent,
@@ -17,7 +14,7 @@ import {
 } from "@/components/ui/card";
 
 import Link from "next/link";
-import { PatientVitalsSchema } from "@/schemas";
+import { PatientFollowUpsSchema } from "@/schemas";
 
 import {
   Form,
@@ -28,79 +25,45 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 
 import { FormError } from "@/components/form-error";
 import { FormSuccess } from "@/components/form-success";
-import { savePatientVitals } from "@/actions/save-patient-vitals";
+import { savePatientFollowup } from "@/actions/save-followups";
+import { fetchFollowUpdata } from "@/actions/fetch-actions/fetch-followup";
+
 import { ArrowRight, HomeIcon } from "lucide-react";
 
-const PatientVitalsForm = () => {
+const PatientFollowUpForm = () => {
   const [error, setError] = useState<string | undefined>("");
   const [success, setSuccess] = useState<string | undefined>("");
-  const [vitalSignsid, setVitalSignsid] = useState<string>("");
-  const [queueId, setQueueId] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
+  const [patientFollowUpRecordId, setPatientFollowUpRecordId] = useState<
+    string | undefined
+  >("");
   const searchParams = useSearchParams();
   const patientId = searchParams.get("patientId");
-  const type = searchParams.get("type");
-  const isNewPatient = searchParams.get("new");
+  const vitalSignsId = searchParams.get("vitalSignsId");
 
-  const form = useForm<z.infer<typeof PatientVitalsSchema>>({
-    resolver: zodResolver(PatientVitalsSchema),
+  const form = useForm<z.infer<typeof PatientFollowUpsSchema>>({
+    resolver: zodResolver(PatientFollowUpsSchema),
     defaultValues: {
       patientId: patientId ?? undefined,
-      pulseRate: 0,
-      bodyTemperature: "",
-      bloodPressure: "",
-      weight: "",
-      oxygen: 0,
+      vitalSignsId: vitalSignsId ?? undefined,
+      labResults: "",
+      chiefComplaint: "",
+      so: "",
+      diagnosis: "",
+      treatment: "",
     },
   });
 
-  useEffect(() => {
-    const fetchQueueId = async () => {
-      const result = await getOrCreateQueue();
-      if (result.success) {
-        setQueueId(result.queueId);
-      } else {
-        console.error(result.error);
-      }
-    };
-
-    fetchQueueId();
-  }, []);
-
-  const handleAddToQueue = () => {
+  const onSubmit = (values: z.infer<typeof PatientFollowUpsSchema>) => {
     setError("");
     setSuccess("");
 
     startTransition(() => {
-      if (patientId && queueId) {
-        addToQueue({
-          queueId,
-          patientId: patientId,
-        })
-          .then((result) => {
-            if (result.success) {
-              setSuccess("Patient added to queue");
-            } else {
-              setError("Patient already in queue.");
-            }
-          })
-          .catch(() => {
-            setError("An error occurred.");
-          });
-      }
-    });
-  };
-
-  const onSubmit = (values: z.infer<typeof PatientVitalsSchema>) => {
-    setError("");
-    setSuccess("");
-
-    startTransition(() => {
-      savePatientVitals(values)
+      savePatientFollowup(values)
         .then((data) => {
           if (data?.error) {
             form.reset();
@@ -110,7 +73,7 @@ const PatientVitalsForm = () => {
           if (data?.success) {
             form.reset();
             setSuccess(data.success);
-            setVitalSignsid(data.vitalSignsid);
+            setPatientFollowUpRecordId(data.followUpRecordId);
           }
         })
         .catch(() => {
@@ -125,7 +88,7 @@ const PatientVitalsForm = () => {
         <CardHeader>
           <CardTitle>Patient Vitals</CardTitle>
           <CardDescription>
-            Fill up the form below to save patient vitals.
+            Fill up the form below to save patient follow-up data.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -163,22 +126,21 @@ const PatientVitalsForm = () => {
       <CardContent>
         <Form {...form}>
           <form
-            className="grid grid-cols-3 grid-flow-row 2xl:gap-6 gap-4"
+            className="grid xl:grid-cols-2 grid-cols-1 grid-flow-row 2xl:gap-6 gap-4 w-full "
             onSubmit={form.handleSubmit(onSubmit)}
           >
             <FormField
               control={form.control}
-              name="pulseRate"
+              name="labResults"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Pulse Rate</FormLabel>
+                  <FormLabel>Lab Results</FormLabel>
                   <FormControl>
-                    <Input
-                      {...field}
-                      value={field.value || ""}
-                      onChange={(e) => field.onChange(Number(e.target.value))}
-                      placeholder="bpm"
+                    <Textarea
+                      placeholder="Type here..."
                       disabled={!!isPending || !!success}
+                      className="h-36 font-medium focus:ring-2 focus:ring-[#2F80ED] focus:ring-opacity-60"
+                      {...field}
                     />
                   </FormControl>
                   <FormMessage />
@@ -188,15 +150,16 @@ const PatientVitalsForm = () => {
 
             <FormField
               control={form.control}
-              name="bodyTemperature"
+              name="chiefComplaint"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Body Temperature</FormLabel>
+                  <FormLabel>Chief Complaint</FormLabel>
                   <FormControl>
-                    <Input
-                      {...field}
-                      placeholder="°C"
+                    <Textarea
+                      placeholder="Type here..."
                       disabled={!!isPending || !!success}
+                      className="h-36 font-medium focus:ring-2 focus:ring-[#2F80ED] focus:ring-opacity-60"
+                      {...field}
                     />
                   </FormControl>
                   <FormMessage />
@@ -206,15 +169,16 @@ const PatientVitalsForm = () => {
 
             <FormField
               control={form.control}
-              name="bloodPressure"
+              name="so"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Blood Pressure</FormLabel>
+                  <FormLabel>SO</FormLabel>
                   <FormControl>
-                    <Input
-                      {...field}
-                      placeholder="mmHg"
+                    <Textarea
+                      placeholder="Type here..."
                       disabled={!!isPending || !!success}
+                      className="h-36 font-medium focus:ring-2 focus:ring-[#2F80ED] focus:ring-opacity-60"
+                      {...field}
                     />
                   </FormControl>
                   <FormMessage />
@@ -224,15 +188,16 @@ const PatientVitalsForm = () => {
 
             <FormField
               control={form.control}
-              name="weight"
+              name="diagnosis"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Weight</FormLabel>
+                  <FormLabel>Diagnosis</FormLabel>
                   <FormControl>
-                    <Input
-                      {...field}
-                      placeholder="kg"
+                    <Textarea
+                      placeholder="Type here..."
                       disabled={!!isPending || !!success}
+                      className="h-36 font-medium focus:ring-2 focus:ring-[#2F80ED] focus:ring-opacity-60"
+                      {...field}
                     />
                   </FormControl>
                   <FormMessage />
@@ -242,17 +207,16 @@ const PatientVitalsForm = () => {
 
             <FormField
               control={form.control}
-              name="oxygen"
+              name="treatment"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Oxygen</FormLabel>
+                  <FormLabel>Treatment</FormLabel>
                   <FormControl>
-                    <Input
-                      {...field}
-                      value={field.value || ""}
-                      onChange={(e) => field.onChange(Number(e.target.value))}
-                      placeholder="%"
+                    <Textarea
+                      placeholder="Type here..."
                       disabled={!!isPending || !!success}
+                      className="h-36 font-medium focus:ring-2 focus:ring-[#2F80ED] focus:ring-opacity-60"
+                      {...field}
                     />
                   </FormControl>
                   <FormMessage />
@@ -260,7 +224,7 @@ const PatientVitalsForm = () => {
               )}
             />
 
-            <div className="flex flex-col col-span-3 mt-4 gap-y-4">
+            <div className="flex flex-col col-span-2 mt-4 gap-y-4">
               <div className="text-center">
                 <FormError message={error} />
                 <FormSuccess message={success} />
@@ -274,49 +238,39 @@ const PatientVitalsForm = () => {
                     className="my-button-blue max-w-sm"
                     disabled={isPending}
                   >
-                    {type === "follow-up"
-                      ? "Save Follow-up Vitals"
-                      : "Save Patient History Vitals"}
+                    Save Follow-up Data
                     <ArrowRight className="size-4 ml-2" />
                   </Button>
                 )}
 
-                {success && isNewPatient === "true" && (
-                  // Add patient to queue
-                  <Button
-                    type="button"
-                    size="lg"
-                    // asChild
-                    className="my-button-blue"
-                    onClick={handleAddToQueue}
-                  >
-                    {/* <Link href="/dashboard/add-new-patient"> */}
-                    Add New Patient to Queue{" "}
-                    <ArrowRight className="size-4 ml-2" />
-                    {/* </Link> */}
-                  </Button>
-                )}
-
-                {success && patientId && vitalSignsid && (
-                  <Button
-                    type="button"
-                    size="lg"
-                    asChild
-                    className="my-button-blue"
-                  >
-                    <Link
-                      href={`/dashboard/${
-                        type === "history" && isNewPatient === "true"
-                          ? `add-patient-history`
-                          : `add-follow-up`
-                      }?patientId=${patientId}&vitalSignsId=${vitalSignsid}`}
+                {success && (
+                  <div className="flex gap-6 items-center">
+                    <Button
+                      type="button"
+                      asChild
+                      className="my-button-blue"
+                      size="lg"
                     >
-                      {type === "follow-up"
-                        ? "Add Follow-up"
-                        : "Add Patient History"}
-                      <ArrowRight className="size-4 ml-2" />
-                    </Link>
-                  </Button>
+                      <Link
+                        href={`/dashboard/add-plan?patientId=${patientId}&recordId=${patientFollowUpRecordId}`}
+                      >
+                        Add Patient Plan Information
+                        <ArrowRight className="size-4 ml-2" />
+                      </Link>
+                    </Button>
+
+                    <Button
+                      type="button"
+                      asChild
+                      className="my-button-blue"
+                      size="lg"
+                    >
+                      <Link href="/dashboard/home">
+                        <HomeIcon className="size-4 mr-2" />
+                        Go Back Home
+                      </Link>
+                    </Button>
+                  </div>
                 )}
               </div>
             </div>
@@ -327,4 +281,4 @@ const PatientVitalsForm = () => {
   );
 };
 
-export default PatientVitalsForm;
+export default PatientFollowUpForm;

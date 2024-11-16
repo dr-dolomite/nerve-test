@@ -4,9 +4,6 @@ import { Input } from "@/components/ui/input";
 import {
   Sheet,
   SheetContent,
-  SheetDescription,
-  SheetHeader,
-  SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
 
@@ -35,16 +32,15 @@ import { EditIcon, PaperclipIcon } from "lucide-react";
 
 import LabRequestForm from "@/components/plan-pages/lab-request-form";
 import TreatmentPlanForm from "@/components/plan-pages/treatment-form";
-// import EditPatientPlan from "../edit/edit-patient-plan";
-import PlanInformationPage from "../plan-pages/plan-page";
+import PlanInformationPage from "@/components/plan-pages/plan-page";
 
 interface PatientPlanViewProps {
+  patientId: string;
   recordId: string;
 }
 
-const PatientPlanView = async ({ recordId }: PatientPlanViewProps) => {
+const PatientPlanView = async ({ recordId, patientId }: PatientPlanViewProps) => {
   const patientPlanDetails = await getPatientPlanByRecordId(recordId);
-  // console.log(patientPlanDetails);
 
   if (recordId === "" || !recordId) {
     return (
@@ -135,9 +131,9 @@ const PatientPlanView = async ({ recordId }: PatientPlanViewProps) => {
             </DialogTrigger>
             <DialogContent className="2xl:max-w-[80%] max-w-[90%]">
               <DialogHeader>
-                <DialogTitle>Edit Patient Plan</DialogTitle>
+                {/* For the padding of close button */}
               </DialogHeader>
-              <PlanInformationPage existingPlanId={patientPlanDetails?.id ?? null} />
+              <PlanInformationPage existingPlanId={patientPlanDetails?.id ?? null} existingRecordId={recordId} existingPatientId={patientId} />
             </DialogContent>
           </Dialog>
         </div>
@@ -160,13 +156,8 @@ const PatientPlanView = async ({ recordId }: PatientPlanViewProps) => {
               Special Notes
             </Label>
           </div>
-          <Textarea className="h-32">
-            {patientPlanDetails?.followUpNotes ||
-              "No special notes was provided"}
-          </Textarea>
-          {/* <p className="text-wrap">
-            {patientPlanDetails?.followUpNotes || "No special notes"}
-          </p> */}
+          <Textarea className="h-32" defaultValue={patientPlanDetails?.followUpNotes ||
+              "No special notes was provided"}/>
         </div>
 
         <div className="grid gap-3">

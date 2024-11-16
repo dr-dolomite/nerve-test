@@ -72,8 +72,7 @@ const DashboardLayout = ({ children }: { children: ReactNode }) => {
                                     pathname == "/dashboard/add-new-patient" ||
                                     pathname == "/dashboard/add-patient-history" ||
                                     pathname == "/dashboard/add-patient-vitals" ||
-                                    pathname == "/dashboard/add-plan" ||
-                                    pathname == "/dashboard/add-follow-up"
+                                    pathname == "/dashboard/add-plan"
                                     ? "bg-gradient-to-r from-blue-500 to-cyan-500 text-white" : "text-primary"}`}
                             >
                                 <Home className="h-5 w-5" />

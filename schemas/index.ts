@@ -108,7 +108,6 @@ export const PatientFollowUpsSchema = z.object({
     so: z.string().min(3, "Subjective observation is required"),
     diagnosis: z.string().min(3, "Diagnosis is required"),
     treatment: z.string().min(3, "Treatment is required"),
-    plan: z.string().min(3, "Plan is required"),
 });
 
 export const PatientPlanSchema = z.object({

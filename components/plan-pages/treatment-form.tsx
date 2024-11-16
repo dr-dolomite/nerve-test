@@ -118,7 +118,7 @@ const TreatmentPlanForm = ({
 
   const printableRef = useRef(null);
 
-  if (!patientId) {
+  if (!patientId && patientId !== "" && !patientPlanId) {
     return (
       <Card>
         <CardHeader>
@@ -126,6 +126,9 @@ const TreatmentPlanForm = ({
           <CardDescription>
             No plan record found for this patient
           </CardDescription>
+          <p>
+            Patient Plan Id: <strong>{patientPlanId}</strong>
+          </p>
         </CardHeader>
         <CardContent>
           <Button className="my-button-blue max-w-xs " asChild>

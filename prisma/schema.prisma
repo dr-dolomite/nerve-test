@@ -182,7 +182,7 @@ model PatientFollowUps {
   so             String
   diagnosis      String
   treatment      String
-  plan           String
+  // plan           String
   vitalSignsId   String   @unique
 
   patient     PatientInformation @relation(fields: [patientId], references: [id], onDelete: Cascade)

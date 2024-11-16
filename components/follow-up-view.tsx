@@ -32,7 +32,7 @@ const FollowUpViewPage = async ({ vitalsId, followUpId }: FollowUpViewProps) => 
 
     const patientVitals = await getPatientVitalsById(vitalsId);
     const patientFollowUp = await getPatientFollowUpById(followUpId);
-    const patientPlan = patientFollowUp?.plan;
+    // const patientPlan = patientFollowUp?.plan;
     const followUpRecordId = patientFollowUp?.id;
 
     return (
@@ -162,7 +162,7 @@ const FollowUpViewPage = async ({ vitalsId, followUpId }: FollowUpViewProps) => 
             </div>
             <Separator className="col-span-2" />
             <div className="col-span-2">
-                <PlanDetailsPage plan={patientPlan || ""} recordId={followUpRecordId || ""} />
+                <PlanDetailsPage plan={""} recordId={followUpRecordId || ""} />
             </div>
         </div>
     )

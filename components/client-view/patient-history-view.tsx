@@ -1,3 +1,6 @@
+"use client";
+
+import { useState, useEffect } from "react";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import {
@@ -9,10 +12,6 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 
-interface PatientHistoryViewPageProps {
-  patientId: string;
-}
-
 import { getPatientHistoryById } from "@/data/get-patient-info";
 import { getPatientVitalsById } from "@/data/get-patient-info";
 import {
@@ -22,20 +21,94 @@ import {
   FaClock,
 } from "react-icons/fa";
 import { Separator } from "@/components/ui/separator";
-// import PlanDetailsPage from "./plan-notes";
-import PatientPlanView from "@/components/view/patient-plan-view";
-
+// import PatientPlanView from "@/components/view/patient-plan-view";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { PlusCircleIcon } from "lucide-react";
 
-const PatientHistoryViewPage = async ({
+interface PatientHistoryViewPageProps {
+  patientId: string;
+}
+
+interface PatientHistory {
+  id: string;
+  patientId: string;
+  referredBy: string | null;
+  chiefComplaint: string;
+  historyOfPresentIllness: string;
+  pastMedicalHistory: string;
+  familyHistory: string;
+  personalSocialHistory: string;
+  obgyneHistory: string | null;
+  physicalExamination: string;
+  neurologicalExamination: string | null;
+  vitalSignsid: string;
+}
+
+interface Vitals {
+  id: string;
+  bloodPressure: string;
+  pulseRate: number;
+  bodyTemperature: string;
+  oxygen: number;
+  weight: string;
+}
+
+const PatientHistoryViewPageClientSide = ({
   patientId,
 }: PatientHistoryViewPageProps) => {
-  const patientHist = await getPatientHistoryById(patientId);
-  const patientVitals = await getPatientVitalsById(
-    patientHist?.vitalSignsid ? patientHist?.vitalSignsid : ""
-  );
+  const [isLoading, setIsLoading] = useState(true);
+  const [patientHist, setPatientHist] = useState<PatientHistory | null>(null);
+  const [patientVitals, setPatientVitals] = useState<Vitals | null>(null);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      setIsLoading(true);
+      try {
+        const historyData = await getPatientHistoryById(patientId);
+        setPatientHist(historyData);
+
+        if (historyData?.vitalSignsid) {
+          const vitalsData = await getPatientVitalsById(
+            historyData.vitalSignsid
+          );
+          setPatientVitals(vitalsData);
+        }
+      } catch (err) {
+        setError("Failed to fetch patient data");
+        console.error("Error fetching patient data:", err);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    if (patientId) {
+      fetchData();
+    }
+  }, [patientId]);
+
+  if (isLoading) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle>Loading...</CardTitle>
+          <CardDescription>Fetching patient history data</CardDescription>
+        </CardHeader>
+      </Card>
+    );
+  }
+
+  if (error) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle>Error</CardTitle>
+          <CardDescription>{error}</CardDescription>
+        </CardHeader>
+      </Card>
+    );
+  }
 
   if (!patientHist) {
     return (
@@ -62,6 +135,8 @@ const PatientHistoryViewPage = async ({
 
   return (
     <div className="grid grid-cols-2 grid-flow-row p-4 gap-8">
+      Patient History: {patientHist.id}
+      Vital Signs: {patientVitals?.id}
       <div className="col-span-2">
         <div className="grid 2xl:grid-cols-5 grid-cols-3 gap-4">
           <Card className="drop-shadow-md">
@@ -131,10 +206,8 @@ const PatientHistoryViewPage = async ({
           </Card>
         </div>
       </div>
-
       <Separator className="col-span-2" />
-
-      <Card className="drop-shadow-md col-span-2 ">
+      <Card className="drop-shadow-md col-span-2">
         <CardHeader>
           <CardTitle>Patient History</CardTitle>
           <CardDescription>View the patient&apos;s history</CardDescription>
@@ -147,8 +220,7 @@ const PatientHistoryViewPage = async ({
                   Chief Complaint
                 </Label>
               </div>
-
-              <p className="text-wrap">{patientHist?.chiefComplaint}</p>
+              <p className="text-wrap">{patientHist.chiefComplaint}</p>
             </div>
 
             <div className="col-span-1 flex flex-col gap-2">
@@ -157,19 +229,17 @@ const PatientHistoryViewPage = async ({
                   Referred By
                 </Label>
               </div>
-              <p className="text-wrap">{patientHist?.referredBy}</p>
+              <p className="text-wrap">{patientHist.referredBy}</p>
             </div>
           </div>
-          {/* <Separator className="col-span-2 mt-4" /> */}
 
-          {/* <Separator className="col-span-2 mt-4" /> */}
-          <div className="col-span-2 flex flex-col gap-2 ">
+          <div className="col-span-2 flex flex-col gap-2">
             <div className="flex shrink-0">
               <Label className="font-semibold bg-[#2F80ED] p-2 text-white">
                 History of Present Illness
               </Label>
             </div>
-            <p className="text-wrap">{patientHist?.historyOfPresentIllness}</p>
+            <p className="text-wrap">{patientHist.historyOfPresentIllness}</p>
           </div>
 
           <div className="col-span-2 flex flex-col gap-2">
@@ -178,8 +248,9 @@ const PatientHistoryViewPage = async ({
                 Past Medical History
               </Label>
             </div>
-            <p className="text-wrap">{patientHist?.pastMedicalHistory}</p>
+            <p className="text-wrap">{patientHist.pastMedicalHistory}</p>
           </div>
+
           <Separator className="col-span-2 mb-4" />
 
           <div className="col-span-1 flex flex-col gap-2">
@@ -188,7 +259,7 @@ const PatientHistoryViewPage = async ({
                 Family History
               </Label>
             </div>
-            <p className="text-wrap">{patientHist?.familyHistory}</p>
+            <p className="text-wrap">{patientHist.familyHistory}</p>
           </div>
 
           <div className="col-span-1 flex flex-col gap-2">
@@ -197,7 +268,7 @@ const PatientHistoryViewPage = async ({
                 Personal, Social, and Emotional History
               </Label>
             </div>
-            <p className="text-wrap">{patientHist?.personalSocialHistory}</p>
+            <p className="text-wrap">{patientHist.personalSocialHistory}</p>
           </div>
 
           <div className="col-span-1 flex flex-col gap-2">
@@ -206,7 +277,7 @@ const PatientHistoryViewPage = async ({
                 OB-GYNE History
               </Label>
             </div>
-            <p className="text-wrap">{patientHist?.obgyneHistory}</p>
+            <p className="text-wrap">{patientHist.obgyneHistory}</p>
           </div>
 
           <div className="col-span-1 flex flex-col gap-2">
@@ -215,7 +286,7 @@ const PatientHistoryViewPage = async ({
                 Neurological Examination
               </Label>
             </div>
-            <p className="text-wrap">{patientHist?.neurologicalExamination}</p>
+            <p className="text-wrap">{patientHist.neurologicalExamination}</p>
           </div>
 
           <div className="2xl:col-span-2 col-span-1 flex flex-col gap-2">
@@ -224,16 +295,18 @@ const PatientHistoryViewPage = async ({
                 Physical Examination
               </Label>
             </div>
-            <p className="text-wrap">{patientHist?.physicalExamination}</p>
+            <p className="text-wrap">{patientHist.physicalExamination}</p>
           </div>
         </CardContent>
       </Card>
-
       <div className="col-span-2">
-        <PatientPlanView recordId={patientHist?.id || ""} patientId={patientHist?.patientId} />
+        {/* <PatientPlanView 
+          recordId={patientHist.id} 
+          patientId={patientHist.patientId} 
+        /> */}
       </div>
     </div>
   );
 };
 
-export default PatientHistoryViewPage;
+export default PatientHistoryViewPageClientSide;

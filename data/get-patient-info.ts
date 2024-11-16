@@ -55,6 +55,7 @@ export const getPatientVitalsById = async (id: string) => {
             id
         }, 
         select: {
+            id: true,
             weight: true,
             bodyTemperature: true,
             bloodPressure: true,
@@ -169,7 +170,7 @@ export async function getPatientPlanByRecordId (recordId: string) {
           OR: [{ followUpId: recordId }, { historyId: recordId }],
         },
       });
-    
+
     // Fetch the plan if it exists
     if (existingPatientPlan) {
         return existingPatientPlan;
