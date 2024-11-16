@@ -1,11 +1,7 @@
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 
-import {
-  Sheet,
-  SheetContent,
-  SheetTrigger,
-} from "@/components/ui/sheet";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 
 import {
   Dialog,
@@ -39,7 +35,10 @@ interface PatientPlanViewProps {
   recordId: string;
 }
 
-const PatientPlanView = async ({ recordId, patientId }: PatientPlanViewProps) => {
+const PatientPlanView = async ({
+  recordId,
+  patientId,
+}: PatientPlanViewProps) => {
   const patientPlanDetails = await getPatientPlanByRecordId(recordId);
 
   if (recordId === "" || !recordId) {
@@ -133,7 +132,11 @@ const PatientPlanView = async ({ recordId, patientId }: PatientPlanViewProps) =>
               <DialogHeader>
                 {/* For the padding of close button */}
               </DialogHeader>
-              <PlanInformationPage existingPlanId={patientPlanDetails?.id ?? null} existingRecordId={recordId} existingPatientId={patientId} />
+              <PlanInformationPage
+                // existingPlanId={patientPlanDetails?.id ?? null}
+                // existingRecordId={recordId}
+                // existingPatientId={patientId}
+              />
             </DialogContent>
           </Dialog>
         </div>
@@ -156,8 +159,13 @@ const PatientPlanView = async ({ recordId, patientId }: PatientPlanViewProps) =>
               Special Notes
             </Label>
           </div>
-          <Textarea className="h-32" defaultValue={patientPlanDetails?.followUpNotes ||
-              "No special notes was provided"}/>
+          <Textarea
+            className="h-32"
+            defaultValue={
+              patientPlanDetails?.followUpNotes ||
+              "No special notes was provided"
+            }
+          />
         </div>
 
         <div className="grid gap-3">
@@ -166,43 +174,50 @@ const PatientPlanView = async ({ recordId, patientId }: PatientPlanViewProps) =>
               Attachments
             </Label>
           </div>
-          <div className="grid grid-flow-row grid-cols-3 gap-4">
-            {/* If the index is present at plan items then use planItems to get its name */}
-            {currentPlan
-              .filter((item) => !["3", "9"].includes(item))
-              .map((item) => (
-                <div key={item} className="flex flex-col gap-2">
-                  <Card className="p-4">
-                    <Sheet>
-                      <div className="flex items-center gap-6">
-                        <SheetTrigger asChild>
-                          <Button variant="outline">
-                            <PaperclipIcon className="size-6 text-[#2F80ED]" />
-                          </Button>
-                        </SheetTrigger>
-                        <SheetContent
-                          side="bottom"
-                          className="max-h-[90%] overflow-y-auto"
-                        >
-                          {planItems[parseInt(item) - 1].pageToRender}
-                        </SheetContent>
-                        <div className="grid gap-1 xs:hidden">
-                          <p className="2xl:text-md text-sm font-semibold leading-none">
-                            {planItems[parseInt(item) - 1].label}
-                          </p>
-                          <p className="2xl:text-sm text-xs text-muted-foreground">
-                            View Attachment
-                          </p>
+          {/* If currentPlan has only the value 3  */}
+          {currentPlan.length === 1 && currentPlan[0] === "3" && (
+            <p>No attachments were provided.</p>
+          )}
+
+          {currentPlan.length > 0 && (
+            <div className="grid grid-flow-row grid-cols-3 gap-4">
+              {/* If the index is present at plan items then use planItems to get its name */}
+              {currentPlan
+                .filter((item) => !["3", "9"].includes(item))
+                .map((item) => (
+                  <div key={item} className="flex flex-col gap-2">
+                    <Card className="p-4">
+                      <Sheet>
+                        <div className="flex items-center gap-6">
+                          <SheetTrigger asChild>
+                            <Button variant="outline">
+                              <PaperclipIcon className="size-6 text-[#2F80ED]" />
+                            </Button>
+                          </SheetTrigger>
+                          <SheetContent
+                            side="bottom"
+                            className="max-h-[90%] overflow-y-auto"
+                          >
+                            {planItems[parseInt(item) - 1].pageToRender}
+                          </SheetContent>
+                          <div className="grid gap-1 xs:hidden">
+                            <p className="2xl:text-md text-sm font-semibold leading-none">
+                              {planItems[parseInt(item) - 1].label}
+                            </p>
+                            <p className="2xl:text-sm text-xs text-muted-foreground">
+                              View Attachment
+                            </p>
+                          </div>
                         </div>
-                      </div>
-                    </Sheet>
-                  </Card>
-                  {/* <Label className="font-semibold bg-[#2F80ED] p-2 text-white">
+                      </Sheet>
+                    </Card>
+                    {/* <Label className="font-semibold bg-[#2F80ED] p-2 text-white">
                 {planItems[parseInt(item) - 1].label}
                 </Label> */}
-                </div>
-              ))}
-          </div>
+                  </div>
+                ))}
+            </div>
+          )}
         </div>
       </CardContent>
     </Card>

@@ -276,7 +276,7 @@ const PlanInformationPage = () => {
     },
     {
       id: "3",
-      label: "Schedule Next Visit",
+      label: "Follow Up",
       formPage: (
         <div className="mb-12">
           <FormField
@@ -284,7 +284,7 @@ const PlanInformationPage = () => {
             name="nextVisit"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Schedule Next Visit</FormLabel>
+                <FormLabel>Schedule Follow Up</FormLabel>
                 <FormControl>
                   <Input
                     {...field}
@@ -497,7 +497,7 @@ const PlanInformationPage = () => {
                         href={`/dashboard/add-patient-vitals?type=follow-up&patientId=${patientId}`}
                       >
                         <div className="flex items-center">
-                          Add Follow-up Data
+                          Add Existing Follow-up Data
                           <ArrowRight className="ml-2 size-4" />
                         </div>
                       </Link>

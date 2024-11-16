@@ -1,11 +1,8 @@
 "use client";
 import * as z from "zod";
-import {
-  useTransition,
-  useState
-} from "react";
-import { useForm } from "react-hook-form"
-import { zodResolver } from "@hookform/resolvers/zod"
+import { useTransition, useState } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { useSearchParams } from "next/navigation";
 
 import {
@@ -24,7 +21,7 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card"
+} from "@/components/ui/card";
 
 import { PatientFollowUpsSchema } from "@/schemas";
 
@@ -38,8 +35,8 @@ import {
 } from "@/components/ui/form";
 
 import Link from "next/link";
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { FormError } from "@/components/form-error";
 import { FormSuccess } from "@/components/form-success";
@@ -48,16 +45,14 @@ import { Textarea } from "@/components/ui/textarea";
 import { ArrowRight, Check, CirclePlus, PrinterIcon } from "lucide-react";
 
 const PatientFollowupForm = () => {
-
   const [error, setError] = useState<string | undefined>("");
   const [success, setSuccess] = useState<string | undefined>("");
-  const [planType, setPlanType] = useState<string | undefined>("");
+  // const [planType, setPlanType] = useState<string | undefined>("");
   const [followUpRecordId, setFollowUpRecordId] = useState<string>("");
   const [isPending, startTransition] = useTransition();
   const searchParams = useSearchParams();
   const patientId = searchParams.get("patientId");
   const vitalSignsId = searchParams.get("vitalSignsId");
-
 
   const form = useForm<z.infer<typeof PatientFollowUpsSchema>>({
     resolver: zodResolver(PatientFollowUpsSchema),
@@ -68,7 +63,7 @@ const PatientFollowupForm = () => {
       so: "",
       diagnosis: "",
       treatment: "",
-      plan: "",
+      // plan: "",
       labResults: "",
     },
   });
@@ -85,20 +80,17 @@ const PatientFollowupForm = () => {
         </CardHeader>
         <CardContent>
           <div className="flex flex-row 2xl:gap-x-12 gap-x-8 mt-4">
-            <Button
-              type="button"
-              asChild
-              className="my-button-blue"
-              size="lg"
-            >
-              <Link href={`/dashboard/add-patient-vitals?patientId=${patientId}&type="follow-up`}>
+            <Button type="button" asChild className="my-button-blue" size="lg">
+              <Link
+                href={`/dashboard/add-patient-vitals?patientId=${patientId}&type="follow-up`}
+              >
                 Add Patient Vitals
               </Link>
             </Button>
           </div>
         </CardContent>
       </Card>
-    )
+    );
   }
 
   const onSubmit = (values: z.infer<typeof PatientFollowUpsSchema>) => {
@@ -117,12 +109,12 @@ const PatientFollowupForm = () => {
             form.reset();
             setSuccess(data.success);
             setFollowUpRecordId(data.followUpRecordId);
-            setPlanType(data.planType);
+            // setPlanType(data.planType);
           }
         })
         .catch(() => {
           setError("An error occurred.");
-        })
+        });
     });
   };
 
@@ -136,16 +128,17 @@ const PatientFollowupForm = () => {
       </CardHeader>
       <CardContent>
         <Form {...form}>
-          <form className="grid grid-cols-2 grid-flow-row gap-6" onSubmit={form.handleSubmit(onSubmit)}>
+          <form
+            className="grid grid-cols-2 grid-flow-row gap-6"
+            onSubmit={form.handleSubmit(onSubmit)}
+          >
             <div className="col-span-1">
               <FormField
                 control={form.control}
                 name="chiefComplaint"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>
-                      Chief Complaint
-                    </FormLabel>
+                    <FormLabel>Chief Complaint</FormLabel>
                     <FormControl>
                       <Input
                         {...field}
@@ -165,9 +158,7 @@ const PatientFollowupForm = () => {
                 name="so"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>
-                      S/O
-                    </FormLabel>
+                    <FormLabel>S/O</FormLabel>
                     <FormControl>
                       <Textarea
                         {...field}
@@ -188,9 +179,7 @@ const PatientFollowupForm = () => {
                 name="labResults"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>
-                      Lab Results
-                    </FormLabel>
+                    <FormLabel>Lab Results</FormLabel>
                     <FormControl>
                       <Textarea
                         {...field}
@@ -211,9 +200,7 @@ const PatientFollowupForm = () => {
                 name="diagnosis"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>
-                      Diagnosis
-                    </FormLabel>
+                    <FormLabel>Diagnosis</FormLabel>
                     <FormControl>
                       <Textarea
                         {...field}
@@ -234,9 +221,7 @@ const PatientFollowupForm = () => {
                 name="treatment"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>
-                      Treatment
-                    </FormLabel>
+                    <FormLabel>Treatment</FormLabel>
                     <FormControl>
                       <Textarea
                         {...field}
@@ -251,7 +236,7 @@ const PatientFollowupForm = () => {
               />
             </div>
 
-            <div className="max-w-sm">
+            {/* <div className="max-w-sm">
               <FormField
                 control={form.control}
                 name="plan"
@@ -279,8 +264,7 @@ const PatientFollowupForm = () => {
                   </FormItem>
                 )}
               />
-            </div>
-
+            </div> */}
 
             <div className="flex flex-col mt-4 col-span-2 gap-y-4">
               <div className="text-center">
@@ -294,7 +278,8 @@ const PatientFollowupForm = () => {
                     type="submit"
                     className="my-button-blue"
                     size="lg"
-                    disabled={isPending}>
+                    disabled={isPending}
+                  >
                     Save Patient Folow-up
                   </Button>
                 )}
@@ -306,7 +291,9 @@ const PatientFollowupForm = () => {
                     className="my-button-blue"
                     size="lg"
                   >
-                    <Link href={`/dashboard/add-plan/${planType}?patientId=${patientId}&id=${followUpRecordId}`}>
+                    <Link
+                      href={`/dashboard/add-plan?patientId=${patientId}&recordId=${followUpRecordId}`}
+                    >
                       Add Patient Plan Information
                       <ArrowRight className="size-4 ml-2" />
                     </Link>
@@ -321,7 +308,9 @@ const PatientFollowupForm = () => {
                       className="my-button-blue"
                       size="lg"
                     >
-                      <Link href={`/dashboard/add-patient-vitals?patientId=${patientId}`}>
+                      <Link
+                        href={`/dashboard/add-patient-vitals?patientId=${patientId}`}
+                      >
                         Add Patient Follow-up
                       </Link>
                     </Button>
@@ -332,20 +321,17 @@ const PatientFollowupForm = () => {
                       className="my-button-gray"
                       size="lg"
                     >
-                      <Link href="/dashboard/home">
-                        Go Back
-                      </Link>
+                      <Link href="/dashboard/home">Go Back</Link>
                     </Button>
                   </>
-                )
-                }
+                )}
               </div>
             </div>
           </form>
         </Form>
       </CardContent>
-    </Card >
-  )
-}
+    </Card>
+  );
+};
 
-export default PatientFollowupForm
+export default PatientFollowupForm;

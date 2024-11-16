@@ -306,9 +306,9 @@ const PatientVitalsForm = () => {
                   >
                     <Link
                       href={`/dashboard/${
-                        type === "history" && isNewPatient === "true"
-                          ? `add-patient-history`
-                          : `add-follow-up`
+                        type === "follow-up"
+                          ? `add-follow-up`
+                          : `add-patient-history`
                       }?patientId=${patientId}&vitalSignsId=${vitalSignsid}`}
                     >
                       {type === "follow-up"
