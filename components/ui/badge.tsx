@@ -9,7 +9,8 @@ const badgeVariants = cva(
     variants: {
       variant: {
         default:
-          "border-transparent bg-gradient-to-r from-blue-500 to-cyan-500 text-primary-foreground hover:bg-primary/80",
+          // "border-transparent bg-gradient-to-r from-blue-500 to-cyan-500 text-primary-foreground hover:bg-primary/80",
+          "border-transparent bg-gradient-to-r from-[#fc6c85] to-[#DD97A4FF] text-primary-foreground hover:bg-primary/80",
         secondary:
           "border-transparent bg-secondary text-secondary-foreground hover:bg-secondary/80",
         destructive:

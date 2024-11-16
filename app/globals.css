@@ -73,7 +73,7 @@
   body {
     /* @apply bg-background text-foreground; */
     @apply text-foreground;
-    background-color: #eefcfd;
+    background-color: #F4C2C2;
   }
 }
 
@@ -97,13 +97,13 @@
 @layer utilities {
   @property --blueColor1 {
     syntax: "<color>";
-    initial-value: #2F80ED;
+    initial-value: #fc6c85;
     inherits: false;
   }
 
   @property --blueColor2 {
     syntax: "<color>";
-    initial-value: #37C9D9;
+    initial-value: #DD97A4FF;
     inherits: false;
   }
 
@@ -113,8 +113,8 @@
   }
 
   .my-button-blue:hover {
-    --blueColor1: #37C9D9;
-    --blueColor2: #2F80ED;
+    --blueColor1: #DD97A4FF;
+    --blueColor2: #fc6c85;
   }
 }
 

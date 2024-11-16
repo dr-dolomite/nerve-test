@@ -75,14 +75,16 @@ const RecordsPage = async () => {
   return (
     <div className="grid gap-y-8">
       <div>
-        <h2 className='font-semibold 2xl:text-2xl text-lg bg-gradient-to-r from-[#2F80ED] to-[#1EBDD2] inline-block text-transparent bg-clip-text'> Patient&apos;s Records </h2>
+        {/* <h2 className='font-semibold 2xl:text-2xl text-lg bg-gradient-to-r from-[#2F80ED] to-[#1EBDD2] inline-block text-transparent bg-clip-text'> Patient&apos;s Records </h2> */}
+
+        <h2 className='font-semibold 2xl:text-2xl text-lg text-black inline-block text-transparent bg-clip-text'> Patient&apos;s Records </h2>
       </div>
 
       <main className="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
         <Tabs defaultValue="all" className="relative mr-auto w-full">
           <div className="flex flex-row" >
             <TabsList className="w-full justify-start rounded-none border-b bg-transparent p-0">
-              <TabsTrigger value="all" className="relative data-[state=active]:bg-none rounded-none border-b-2 border-b-transparent bg-transparent px-4 pb-3 pt-2 font-semibold text-muted-foreground shadow-none transition-none focus-visible:ring-0 data-[state=active]:border-b-[#2F80ED] data-[state=active]:text-foreground data-[state=active]:shadow-none " >All</TabsTrigger>
+              <TabsTrigger value="all" className="relative data-[state=active]:bg-none rounded-none border-b-2 border-b-transparent bg-transparent px-4 pb-3 pt-2 font-semibold text-muted-foreground shadow-none transition-none focus-visible:ring-0 data-[state=active]:border-b-[#DD97A4FF] data-[state=active]:text-foreground data-[state=active]:shadow-none " >All</TabsTrigger>
               {/* <TabsTrigger value="active" className="relative data-[state=active]:bg-none rounded-none border-b-2 border-b-transparent bg-transparent px-4 pb-3 pt-2 font-semibold text-muted-foreground shadow-none transition-none focus-visible:ring-0 data-[state=active]:border-b-primary data-[state=active]:text-foreground data-[state=active]:shadow-none " >Recent</TabsTrigger>
               <TabsTrigger value="recent" className="relative data-[state=active]:bg-none rounded-none border-b-2 border-b-transparent bg-transparent px-4 pb-3 pt-2 font-semibold text-muted-foreground shadow-none transition-none focus-visible:ring-0 data-[state=active]:border-b-primary data-[state=active]:text-foreground data-[state=active]:shadow-none " >Active</TabsTrigger>
               <TabsTrigger value="archived" className="relative data-[state=active]:bg-none rounded-none border-b-2 border-b-transparent bg-transparent px-4 pb-3 pt-2 font-semibold text-muted-foreground shadow-none transition-none focus-visible:ring-0 data-[state=active]:border-b-primary data-[state=active]:text-foreground data-[state=active]:shadow-none ">

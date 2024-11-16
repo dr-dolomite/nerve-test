@@ -122,6 +122,14 @@ const LabRequestForm = ({ patientPlanId, patientId }: LabRequestFormProps) => {
       id: "17",
       label: "Platelet Count",
     },
+    {
+      id: "18",
+      label: "Fecalysis",
+    },
+    {
+      id: "19",
+      label: "SGOT",
+    },
   ];
 
   const [formData, setFormData] = useState<z.infer<

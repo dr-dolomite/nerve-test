@@ -74,7 +74,7 @@ const DashboardLayout = ({ children }: { children: ReactNode }) => {
                                     pathname == "/dashboard/add-patient-vitals" ||
                                     pathname == "/dashboard/add-plan" ||
                                     pathname == "/dashboard/add-follow-up"
-                                    ? "bg-gradient-to-r from-blue-500 to-cyan-500 text-white" : "text-primary"}`}
+                                    ? "bg-gradient-to-r from-[#fc6c85] to-[#DD97A4FF] text-white" : "text-primary"}`}
                             >
                                 <Home className="h-5 w-5" />
                                 Dashboard
@@ -82,7 +82,7 @@ const DashboardLayout = ({ children }: { children: ReactNode }) => {
 
                             <Link
                                 href="/dashboard/records"
-                                className={`flex items-center gap-3 rounded-lg antialiased px-3 py-2 transition-all ${pathname.startsWith("/dashboard/records") ? "bg-gradient-to-r from-blue-500 to-cyan-500 text-white" : "text-primary`"}`}
+                                className={`flex items-center gap-3 rounded-lg antialiased px-3 py-2 transition-all ${pathname.startsWith("/dashboard/records") ? "bg-gradient-to-r from-[#fc6c85] to-[#DD97A4FF] text-white" : "text-primary`"}`}
                             >
                                 <FileText className="h-5 w-5" />
                                 Records
@@ -116,21 +116,21 @@ const DashboardLayout = ({ children }: { children: ReactNode }) => {
                                 </Link>
                                 <Link
                                     href="/doctor/dashboard/patient"
-                                    className={`mx-[-0.65rem] flex items-center gap-4 rounded-xl px-3 py-2 ${pathname == "/doctor/dashboard/patient" ? "bg-gradient-to-r from-blue-500 to-cyan-500 text-white" : "text-primary`"}`}
+                                    className={`mx-[-0.65rem] flex items-center gap-4 rounded-xl px-3 py-2 ${pathname == "/doctor/dashboard/patient" ? "bg-gradient-to-r from-[#fc6c85] to-[#DD97A4FF] text-white" : "text-primary`"}`}
                                 >
                                     <Home className="h-5 w-5" />
                                     Dashboard
                                 </Link>
                                 <Link
                                     href="/doctor/records"
-                                    className={`mx-[-0.65rem] flex items-center gap-4 rounded-xl px-3 py-2 ${pathname == "/doctor/records" ? "bg-gradient-to-r from-blue-500 to-cyan-500 text-white" : "text-primary hover:bg-gray-500`"}`}
+                                    className={`mx-[-0.65rem] flex items-center gap-4 rounded-xl px-3 py-2 ${pathname == "/doctor/records" ? "bg-gradient-to-r from-[#fc6c85] to-[#DD97A4FF] text-white" : "text-primary hover:bg-gray-500`"}`}
                                 >
                                     <FileText className="h-5 w-5" />
                                     Records
                                 </Link>
                                 <Link
                                     href="/doctor/calendar"
-                                    className={`mx-[-0.65rem] flex items-center gap-4 rounded-xl px-3 py-2 ${pathname == "/doctor/calendar" ? "bg-gradient-to-r from-blue-500 to-cyan-500 text-white" : "text-primary`"}`}
+                                    className={`mx-[-0.65rem] flex items-center gap-4 rounded-xl px-3 py-2 ${pathname == "/doctor/calendar" ? "bg-gradient-to-r from-[#fc6c85] to-[#DD97A4FF] text-white" : "text-primary`"}`}
                                 >
                                     <Calendar className="h-5 w-5" />
                                     Calendar

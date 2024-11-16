@@ -50,7 +50,7 @@ const ClerkDashboardPage = () => {
     <div className="grid gap-6">
       <div className="flex justify-between">
         <div className="flex flex-col items-start">
-          <h2 className="text-gray font-medium 2xl:text-lg text-md antialiased">
+          <h2 className="text-black font-medium 2xl:text-lg text-md antialiased">
             Hi {user?.name},
           </h2>
           <h1 className="text-primary font-semibold 2xl:text-2xl text-xl antialiased">
@@ -59,7 +59,7 @@ const ClerkDashboardPage = () => {
         </div>
 
         <div className="flex flex-col items-end">
-          <h2 className="text-gray font-medium 2xl:text-lg text-md  antialiased">
+          <h2 className="text-black font-medium 2xl:text-lg text-md  antialiased">
             Today is
           </h2>
           <h1 className="text-primary font-medium 2xl:text-lg text-md antialiased">
@@ -85,7 +85,7 @@ const ClerkDashboardPage = () => {
               </Link>
             </Button>
 
-            <Button asChild className="my-button-blue">
+            <Button asChild disabled className="my-button-blue">
               <Link href="/dashboard/add-new-patient">
                 <CirclePlus className="w-6 h-6 mr-2" /> Add New Patient
               </Link>
